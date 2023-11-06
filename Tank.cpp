@@ -1,149 +1,173 @@
 #pragma once
-#include <stdio.h>
-#include <string>
-#include <vector>
+#include "Tank.h"
 
-class Tank {
-	struct {
-		float x = 0;
-		float y = 0;
-	} location;
-	struct {
-		int index = 0;
-		std::string playerName = "A";
-		int health = 100;
-		int ammo = 100;
-		std::string weapon = "Cannon";
-		float startPower = 50.0f;
-		float maxPower = 100.0f;
-		float minPower = 1.0f;
-	} playerInfo;
-	struct {
-		int bodyX	= 64;
-		int bodyY	= 64;
-	} tankSize;
-	struct {
-		int angle = 270;
-		int width = 10;
-		int height = 60;
-	} turret;
+Tank::Tank()
+{
+    // Constructor logic, if any
+}
 
-	public:
-		Tank() {
-			// Constructor logic, if any
-		}
+Tank::Tank(float x, float y, int index, std::string playerName)
+{
+    location.x = x;
+    location.y = y;
+    playerInfo.playerName = playerName;
+    playerInfo.index = index;
+}
 
-		Tank(float x, float y, int index, std::string playerName) {
-			location.x = x;
-			location.y = y;
-			playerInfo.playerName = playerName;
-			playerInfo.index = index;
-		}
-		void setAngle(float angle) {
-			printf("Tank.cpp - Player: %s setAngle: %d\n", getPlayerName().c_str(), angle);
-			turret.angle = angle;
-		}
+void Tank::setOnGround(bool onGround)
+{
+    this->onGround = onGround;
+}
 
-		void incAngle() {
-			turret.angle++;
-		}
-		void decAngle() {
-			turret.angle--;
-		}
+bool Tank::getOnGround()
+{
+    return this->onGround;
+}
 
-		void incPower() {
-			playerInfo.startPower++;
-		}
-		void decPower() {
-			playerInfo.startPower--;
-		}
-		float getPower() {
-			if (playerInfo.startPower > playerInfo.maxPower) {
-				playerInfo.startPower = playerInfo.maxPower;
-			}
-			else if (playerInfo.startPower < playerInfo.minPower) {
-				playerInfo.startPower = playerInfo.minPower;
-			}
-			return playerInfo.startPower;
-		}
+void Tank::setAngle(float angle)
+{
+    printf("Tank.cpp - Player: %s setAngle: %f\n", getPlayerName().c_str(), angle);
+    turret.angle = angle;
+}
 
+void Tank::incAngle()
+{
+    turret.angle++;
+}
 
-		
-		float getAngle() {
-			normalizeAngle();
-			return turret.angle;
-		}
+void Tank::decAngle()
+{
+    turret.angle--;
+}
 
-		void normalizeAngle() {
-			if (turret.angle > 360) {
-				turret.angle = 0;
-			}
-			if (turret.angle < 0) {
-				turret.angle = 360;
-			}
-		}
-		void setLocation(float x, float y) {
-			location.x = x;
-			location.y = y;
-		}
-		float getX() {
-			return location.x;
-		}
-		float getY() {
-			return location.y;
-		}
-		void Fire() {
-			printf("Tank.cpp - FIRE!\n");
-			// Create a new projectile and add it to the container
-			
+void Tank::incPower()
+{
+    playerInfo.startPower++;
+}
 
-			// Now, you can tell the renderer to draw the projectiles
-			//renderer.drawProjectiles(projectiles);
-		}
+void Tank::decPower()
+{
+    playerInfo.startPower--;
+}
 
+float Tank::getPower()
+{
+    if (playerInfo.startPower > playerInfo.maxPower)
+    {
+        playerInfo.startPower = playerInfo.maxPower;
+    }
+    else if (playerInfo.startPower < playerInfo.minPower)
+    {
+        playerInfo.startPower = playerInfo.minPower;
+    }
+    return playerInfo.startPower;
+}
 
-		int getOriginX() {
-			return tankSize.bodyX / 2;
-		}
-		int getOriginY() {
-			return tankSize.bodyY / 2;
-		}
-		int getBodyX() {
-			return tankSize.bodyX;
-		}
-		int getBodyY() {
-			return tankSize.bodyY;
-		}
-		int getTurretX() {
-			return tankSize.bodyX / 2;
-		}
-		int getTurretY() {
-			return -tankSize.bodyY;
-		}
-		int getTurretWidth() {
-			return turret.width;
-		}
-		int getTurretHeight() {
-			return turret.height;
-		}
+float Tank::getAngle()
+{
+    normalizeAngle();
+    return turret.angle;
+}
 
-		std::string getPlayerName() {
-				return playerInfo.playerName;
-		}
+void Tank::normalizeAngle()
+{
+    if (turret.angle > 360)
+    {
+        turret.angle = 0;
+    }
+    if (turret.angle < 0)
+    {
+        turret.angle = 360;
+    }
+}
 
-		int getIndex() {
-			return playerInfo.index;
-		}
+void Tank::setLocation(float x, float y)
+{
+    // printf("Tank.cpp - Player: %s setLocation: %f, %f\n", getPlayerName().c_str(), x, y);
+    location.x = x;
+    location.y = y;
+}
 
-		int getHealth() {
-			return playerInfo.health;
-		}
-		int getAmmo() {
-			return playerInfo.ammo;
-		}
-		std::string getWeaponName() {
-			return playerInfo.weapon;
-		}
+float Tank::getX()
+{
+    return location.x;
+}
 
+float Tank::getY()
+{
+    return location.y;
+}
 
-};
+void Tank::Fire()
+{
+    printf("Tank.cpp - FIRE!\n");
+    // Create a new projectile and add it to the container
+
+    // Now, you can tell the renderer to draw the projectiles
+    // renderer.drawProjectiles(projectiles);
+}
+
+float Tank::getOriginX()
+{
+    return tankSize.bodyX / 2.0f;
+}
+
+float Tank::getOriginY()
+{
+    return tankSize.bodyY / 2.0f;
+}
+
+float Tank::getBodyX()
+{
+    return tankSize.bodyX;
+}
+
+float Tank::getBodyY()
+{
+    return tankSize.bodyY;
+}
+
+float Tank::getTurretX()
+{
+    return tankSize.bodyX / 2.0f;
+}
+
+float Tank::getTurretY()
+{
+    return -tankSize.bodyY;
+}
+
+float Tank::getTurretWidth()
+{
+    return turret.width;
+}
+
+float Tank::getTurretHeight()
+{
+    return turret.height;
+}
+
+std::string Tank::getPlayerName()
+{
+    return playerInfo.playerName;
+}
+
+int Tank::getIndex()
+{
+    return playerInfo.index;
+}
+
+int Tank::getHealth()
+{
+    return playerInfo.health;
+}
+
+int Tank::getAmmo()
+{
+    return playerInfo.ammo;
+}
+
+std::string Tank::getWeaponName()
+{
+    return playerInfo.weapon;
+}

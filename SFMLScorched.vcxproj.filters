@@ -53,15 +53,48 @@
     <ClCompile Include="ProjectileCannon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HUD.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Explosion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="terrainFragment.frag">
-      <Filter>Resource Files\Shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileCannon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Explosion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scorched.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -76,19 +109,25 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Media Include="9mm-pistol-shoot-short-reverb-7152.wav">
-      <Filter>Resource Files\Sounds</Filter>
-    </Media>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="rock1.jpg">
-      <Filter>Resource Files\Images</Filter>
-    </Image>
-    <Image Include="sky1.png">
-      <Filter>Resource Files\Images</Filter>
-    </Image>
     <Image Include="Images\Terrain\overlay.png">
       <Filter>Resource Files\Images</Filter>
     </Image>
+    <Image Include="Images\rock1.jpg">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\sky1.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\hudBackground.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Sounds\9mm-pistol-shoot-short-reverb-7152.wav">
+      <Filter>Resource Files\Sounds</Filter>
+    </Media>
+    <Media Include="Sounds\mixkit-blast-hit-with-echo-2186.wav">
+      <Filter>Resource Files\Sounds</Filter>
+    </Media>
   </ItemGroup>
 </Project>

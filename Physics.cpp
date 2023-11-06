@@ -1,47 +1,46 @@
-#include <vector>
-#include "Tank.cpp"
-#include "Config.h"
-#include "SFML/Graphics.hpp"
+#pragma once
 
-class Physics {
-public:
-    Physics() {
-        this->gravity = constants::GRAVITY;
-    }
-    Physics(float gravity) : gravity(gravity) {
-    	// Constructor logic, if any
-        this->gravity = gravity;
-    }
+#include "Physics.h"
 
-    float getGravity() {
-		return this->gravity;
-	}
 
-    bool applyGravity(std::vector<Tank>& tanks, const std::vector<int>& terrain, int screenHeight, sf::Time deltaTime) {
-        bool tankFell = false;
-        int pixelsPerSecond = 1;  // Adjust this value to control the falling speed
+Physics::Physics()
+{
+    this->gravity = constants::GRAVITY;
+}
+Physics::Physics(float gravity) : gravity(gravity)
+{
+    // Constructor logic, if any
+    this->gravity = gravity;
+}
 
-        for (Tank& tank : tanks) {
-            int tankX = tank.getX();
-            float tankY = tank.getY() + tank.getBodyY();
-            int terrainHeight = screenHeight - terrain[tankX];
+float Physics::getGravity()
+{
+    return this->gravity;
+}
 
-            if (tankY < terrainHeight) {
-                float deltaTimeSeconds = deltaTime.asSeconds();
-                float newTankY = tankY + (pixelsPerSecond * deltaTimeSeconds);
-
-                if (newTankY >= terrainHeight) {
-                    newTankY = terrainHeight;
-                }
-
-                tank.setLocation(tankX, newTankY);
-                tankFell = true;
+void Physics::applyGravity(std::vector<Tank>& tanks, TerrainGenerator& terrain, sf::Time deltaTime)
+{
+    for (Tank& tank : tanks)
+    {
+        if (!tank.getOnGround())
+        {
+            float pixelsPerSecond = 10.0f; // Adjust this value to control the falling
+            terrain.updateScale();
+            float scale = terrain.getScale().y;
+            float xScale = terrain.getScale().x;
+            float groundHeight = terrain.getFirstNonTransparentPixelinX(static_cast<int>(tank.getX() / xScale));
+            float scaledGroundHeight = groundHeight * scale;
+            float oldLocation = tank.getY();
+            float newLocation = oldLocation + pixelsPerSecond;
+            if (scaledGroundHeight <= oldLocation)
+            {
+                tank.setOnGround(true);
+            }
+            else
+            {
+                tank.setLocation(tank.getX(), newLocation);
+                tank.setOnGround(false);
             }
         }
-
-        return tankFell;
     }
-
-private:
-    float gravity;
-};
+}

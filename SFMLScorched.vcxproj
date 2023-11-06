@@ -129,7 +129,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="ProjectileCannon.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -140,9 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="terrainFragment.frag">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Roboto-Bold.ttf">
@@ -151,25 +150,41 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
+    <ClInclude Include="Explosion.h" />
+    <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="HUD.h" />
+    <ClInclude Include="Physics.h" />
+    <ClInclude Include="ProjectileCannon.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Scorched.h" />
+    <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="Tank.h" />
+    <ClInclude Include="TerrainGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ResourcesAudio.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="9mm-pistol-shoot-short-reverb-7152.wav">
+    <Image Include="Images\hudBackground.png">
       <DeploymentContent>true</DeploymentContent>
-    </Media>
-  </ItemGroup>
-  <ItemGroup>
+    </Image>
+    <Image Include="Images\rock1.jpg">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Images\sky1.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="Images\Terrain\overlay.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="rock1.jpg">
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Sounds\9mm-pistol-shoot-short-reverb-7152.wav">
       <DeploymentContent>true</DeploymentContent>
-    </Image>
-    <Image Include="sky1.png">
+    </Media>
+    <Media Include="Sounds\mixkit-blast-hit-with-echo-2186.wav">
       <DeploymentContent>true</DeploymentContent>
-    </Image>
+    </Media>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

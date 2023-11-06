@@ -1,53 +1,34 @@
-#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Window.hpp>
-#include <iostream>
 
-#include <cmath>
-#include <ctime>
-#include <vector>
-#include <string>
+#include "Scorched.h"
 
 
-#include "Renderer.cpp"
-#include "TerrainGenerator.cpp"
+Game::Game(int screenWidth, int screenHeight): renderer(screenWidth, screenHeight)
+{
+    // Initialize your game objects, terrain data, etc.
+    this->screenWidth = screenWidth;
+    this->screenHeight = screenHeight;
+}
 
-class Game {
-public:
+void Game::run()
+{
+    srand(static_cast<unsigned>(time(0)));
+    renderer.start();
+}
 
-    Game(int screenWidth, int screenHeight, const std::string& windowTitle)
-        : renderer(screenWidth, screenHeight, windowTitle) {
-        // Initialize your game objects, terrain data, etc.
-        this->screenWidth = screenWidth;
-        this->screenHeight = screenHeight;
-    }
+void Game::update()
+{
+    // Update game logic here
+}
 
-    void run() {
-        srand(static_cast<unsigned>(time(0)));
-        renderer.start();
-    }
+void Game::render()
+{
+    // renderer.renderTerrain(); // Call the rendering function from your Renderer
+    //  Render other game objects
+}
 
-
-private:
-    Renderer renderer; // Your Renderer class
-    int screenWidth;
-    int screenHeight;
-
-    // Add other game-related members here
-
-    void update() {
-        // Update game logic here
-    }
-
-    void render() {
-        //renderer.renderTerrain(); // Call the rendering function from your Renderer
-        // Render other game objects
-    }
-};
-
-int main() {
-
-    Game game(1280, 720, constants::GAME_TITLE);
+int main()
+{
+    Game game(constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT);
     game.run();
 
     return 0;
