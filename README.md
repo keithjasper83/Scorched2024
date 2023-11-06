@@ -1,5 +1,6 @@
 # SFMLScorched
 A simple Scorched Earth clone written in C++ using SFML.
+Every publish of this project will be a "working" version, it may be buggy but will always work when compiled and ran with the latest version of Visual Studio.
 
 ## A work in progress
 Due to the nature of this project, it is a work in progress. I will be adding features as I go along.
