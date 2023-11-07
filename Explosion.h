@@ -1,20 +1,20 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-class Explosion
+class explosion
 {
-public:
-    Explosion(float x, float y, float size, sf::Time duration);
-    void update(sf::Time deltaTime);
-    bool isActive() const;
-    void render(sf::RenderWindow& window) const;
-    sf::Vector2f getPosition() const;
-    float getExplosionSize() const;
+  public:
+    explosion(float x, float y, float size, sf::Time duration);
+    void update(sf::Time delta_time);
+    bool is_active() const;
+    void render(sf::RenderWindow &window) const;
+    sf::Vector2f get_position() const;
+    float get_explosion_size() const;
 
-private:
-    sf::Vector2f position;
-    float explosionSize;
-    sf::Time explosionDuration;
-    bool active;
-    sf::CircleShape explosionShape; // Used for rendering
+  private:
+    sf::Vector2f position_;
+    float explosion_size_;
+    sf::Time explosion_duration_;
+    bool active_;
+    sf::CircleShape explosion_shape_; // Used for rendering
 };

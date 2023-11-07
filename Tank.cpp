@@ -1,104 +1,98 @@
-#pragma once
 #include "Tank.h"
 
-Tank::Tank()
+tank::tank(const float x, const float y, const int index, const std::string &player_name)
 {
-    // Constructor logic, if any
+    location_.x = x;
+    location_.y = y;
+    player_info_.player_name = player_name;
+    player_info_.index = index;
 }
 
-Tank::Tank(float x, float y, int index, std::string playerName)
+void tank::set_on_ground(bool on_ground)
 {
-    location.x = x;
-    location.y = y;
-    playerInfo.playerName = playerName;
-    playerInfo.index = index;
+    this->on_ground = on_ground;
 }
 
-void Tank::setOnGround(bool onGround)
+bool tank::get_on_ground() const
 {
-    this->onGround = onGround;
+    return this->on_ground;
 }
 
-bool Tank::getOnGround()
+void tank::set_angle(const float angle)
 {
-    return this->onGround;
+    printf("Tank.cpp - Player: %s setAngle: %f\n", get_player_name().c_str(), angle);
+    turret_.angle = angle;
 }
 
-void Tank::setAngle(float angle)
+void tank::inc_angle()
 {
-    printf("Tank.cpp - Player: %s setAngle: %f\n", getPlayerName().c_str(), angle);
-    turret.angle = angle;
+    turret_.angle++;
 }
 
-void Tank::incAngle()
+void tank::dec_angle()
 {
-    turret.angle++;
+    turret_.angle--;
 }
 
-void Tank::decAngle()
+void tank::inc_power()
 {
-    turret.angle--;
+    player_info_.start_power++;
 }
 
-void Tank::incPower()
+void tank::dec_power()
 {
-    playerInfo.startPower++;
+    player_info_.start_power--;
 }
 
-void Tank::decPower()
+float tank::get_power()
 {
-    playerInfo.startPower--;
-}
-
-float Tank::getPower()
-{
-    if (playerInfo.startPower > playerInfo.maxPower)
+    if (player_info_.start_power > player_info_.max_power)
     {
-        playerInfo.startPower = playerInfo.maxPower;
+        player_info_.start_power = player_info_.max_power;
     }
-    else if (playerInfo.startPower < playerInfo.minPower)
+    else if (player_info_.start_power < player_info_.min_power)
     {
-        playerInfo.startPower = playerInfo.minPower;
+        player_info_.start_power = player_info_.min_power;
     }
-    return playerInfo.startPower;
+    return player_info_.start_power;
 }
 
-float Tank::getAngle()
+float tank::get_angle()
 {
-    normalizeAngle();
-    return turret.angle;
+    normalize_angle();
+    return turret_.angle;
 }
 
-void Tank::normalizeAngle()
+void tank::normalize_angle()
 {
-    if (turret.angle > 360)
+    if (turret_.angle > 360)
     {
-        turret.angle = 0;
+        turret_.angle = 0;
     }
-    if (turret.angle < 0)
+    if (turret_.angle < 0)
     {
-        turret.angle = 360;
+        turret_.angle = 360;
     }
 }
 
-void Tank::setLocation(float x, float y)
+void tank::set_location(float x, float y)
 {
     // printf("Tank.cpp - Player: %s setLocation: %f, %f\n", getPlayerName().c_str(), x, y);
-    location.x = x;
-    location.y = y;
+    location_.x = x;
+    location_.y = y;
 }
 
-float Tank::getX()
+float tank::get_x() const
 {
-    return location.x;
+    return location_.x;
 }
 
-float Tank::getY()
+float tank::get_y() const
 {
-    return location.y;
+    return location_.y;
 }
 
-void Tank::Fire()
+void tank::fire()
 {
     printf("Tank.cpp - FIRE!\n");
     // Create a new projectile and add it to the container
@@ -107,67 +101,67 @@ void Tank::Fire()
     // renderer.drawProjectiles(projectiles);
 }
 
-float Tank::getOriginX()
+float tank::get_origin_x() const
 {
-    return tankSize.bodyX / 2.0f;
+    return tank_size_.body_x / 2.0f;
 }
 
-float Tank::getOriginY()
+float tank::get_origin_y() const
 {
-    return tankSize.bodyY / 2.0f;
+    return tank_size_.body_y / 2.0f;
 }
 
-float Tank::getBodyX()
+float tank::get_body_x() const
 {
-    return tankSize.bodyX;
+    return tank_size_.body_x;
 }
 
-float Tank::getBodyY()
+float tank::get_body_y() const
 {
-    return tankSize.bodyY;
+    return tank_size_.body_y;
 }
 
-float Tank::getTurretX()
+float tank::get_turret_x() const
 {
-    return tankSize.bodyX / 2.0f;
+    return tank_size_.body_x / 2.0f;
 }
 
-float Tank::getTurretY()
+float tank::get_turret_y() const
 {
-    return -tankSize.bodyY;
+    return -tank_size_.body_y;
 }
 
-float Tank::getTurretWidth()
+float tank::get_turret_width() const
 {
-    return turret.width;
+    return turret_.width;
 }
 
-float Tank::getTurretHeight()
+float tank::get_turret_height() const
 {
-    return turret.height;
+    return turret_.height;
 }
 
-std::string Tank::getPlayerName()
+std::string tank::get_player_name()
 {
-    return playerInfo.playerName;
+    return player_info_.player_name;
 }
 
-int Tank::getIndex()
+int tank::get_index() const
 {
-    return playerInfo.index;
+    return player_info_.index;
 }
 
-int Tank::getHealth()
+int tank::get_health() const
 {
-    return playerInfo.health;
+    return player_info_.health;
 }
 
-int Tank::getAmmo()
+int tank::get_ammo() const
 {
-    return playerInfo.ammo;
+    return player_info_.ammo;
 }
 
-std::string Tank::getWeaponName()
+std::string tank::get_weapon_name()
 {
-    return playerInfo.weapon;
+    return player_info_.weapon;
 }

@@ -1,22 +1,21 @@
 #pragma once
-#include <SFML/Audio.hpp>
 #include "FileSystem.h"
+#include <SFML/Audio.hpp>
 #include <iostream>
 
-class SoundManager
+class sound_manager
 {
   public:
-    SoundManager();
-    ~SoundManager();
-    void Fire();
-    void Explode();
+    sound_manager();
+    void fire();
+    void explode();
 
   private:
-    sf::SoundBuffer SoundBuffer_FireProjectile;
-    sf::SoundBuffer SoundBuffer_Explosion;
-    sf::Sound Sound_FireProjectile;
-    sf::Sound Sound_Explosion;
+    sf::SoundBuffer sound_buffer_fire_projectile_;
+    sf::SoundBuffer sound_buffer_explosion_;
+    sf::Sound sound_fire_projectile_;
+    sf::Sound sound_explosion_;
 
-    void LoadSounds();
-    void LoadSound(std::string soundName, sf::SoundBuffer &soundBuffer, sf::Sound &sound);
+    void load_sounds();
+    void load_sound(std::string sound_name, sf::SoundBuffer &sound_buffer, sf::Sound &sound);
 };

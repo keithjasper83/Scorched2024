@@ -14,16 +14,9 @@
 /// <summary>
 /// Constructor
 /// </summary>
-SoundManager::SoundManager()
+sound_manager::sound_manager()
 {
-    LoadSounds();
-}
-
-/// <summary>
-/// Destructor
-/// </summary>
-SoundManager::~SoundManager()
-{
+    load_sounds();
 }
 
 /// <summary>
@@ -38,10 +31,10 @@ SoundManager::~SoundManager()
 /// <returns>void</returns>
 /// <remarks>none</remarks>
 /// <see cref="SoundManager"/>
-void SoundManager::Fire()
+void sound_manager::fire()
 {
-    std::cout << "SoundManager::Fire()" << std::endl;
-    Sound_FireProjectile.play();
+    std::cout << "sound_manager::fire()" << std::endl;
+    sound_fire_projectile_.play();
 }
 
 /// <summary>
@@ -56,10 +49,10 @@ void SoundManager::Fire()
 /// <returns>void</returns>
 /// <remarks>none</remarks>
 /// <see cref="SoundManager"/>
-void SoundManager::Explode()
+void sound_manager::explode()
 {
-    std::cout << "SoundManager::Explode()" << std::endl;
-    Sound_Explosion.play();
+    std::cout << "sound_manager::explode()" << std::endl;
+    sound_explosion_.play();
 }
 
 /// <summary>
@@ -74,28 +67,29 @@ void SoundManager::Explode()
 /// <returns>void</returns>
 /// <remarks>none</remarks>
 /// <see cref="SoundManager"/>
-void SoundManager::LoadSounds()
+void sound_manager::load_sounds()
 {
-    SoundManager::LoadSound("mixkit-blast-hit-with-echo-2186.wav", SoundBuffer_Explosion, Sound_Explosion);
-    SoundManager::LoadSound("9mm-pistol-shoot-short-reverb-7152.wav", SoundBuffer_FireProjectile, Sound_FireProjectile);
+    sound_manager::load_sound("mixkit-blast-hit-with-echo-2186.wav", sound_buffer_explosion_, sound_explosion_);
+    sound_manager::load_sound("9mm-pistol-shoot-short-reverb-7152.wav", sound_buffer_fire_projectile_,
+                              sound_fire_projectile_);
 }
 
 /// <summary>
 /// <para>Load_FireProjectile() - Loads the FireProjectile sound</para>
 /// </summary>
 /// <returns>void</returns>
-void SoundManager::LoadSound(std::string soundName, sf::SoundBuffer &soundBuffer, sf::Sound &sound)
+void sound_manager::load_sound(std::string sound_name, sf::SoundBuffer &sound_buffer, sf::Sound &sound)
 {
-    std::string Filename = "Sounds/" + soundName;
-    if (FileSystem::fileExists(Filename))
+    std::string Filename = "Sounds/" + sound_name;
+    if (file_system::file_exists(Filename))
     {
-        if (!soundBuffer.loadFromFile(Filename))
+        if (!sound_buffer.loadFromFile(Filename))
         {
             std::cout << "ERROR File not found - " << Filename << std::endl;
         }
         else
         {
-            sound.setBuffer(soundBuffer);
+            sound.setBuffer(sound_buffer);
         }
     }
     else

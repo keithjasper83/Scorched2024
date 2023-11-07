@@ -1,17 +1,17 @@
 #pragma once
 #include "Renderer.h"
 
-class Game
+class game
 {
-public:
-    Game(int screenWidth, int screenHeight);
+  public:
+    game(int screen_width, int screen_height);
 
     void run();
 
-private:
-    Renderer renderer; // Your Renderer class
-    int screenWidth;
-    int screenHeight;
+  private:
+    renderer renderer_; // Your Renderer class
+    int screen_width_;
+    int screen_height_;
 
     // Add other game-related members here
 

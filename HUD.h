@@ -3,16 +3,17 @@
 #include "Tank.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
-class HUD {
-private:
-    sf::Font font;
-    sf::Texture backgroundImageTexture;
-    sf::Sprite backgroundImageSprite;
+class hud
+{
+  private:
+    sf::Font font_;
+    sf::Texture background_image_texture_;
+    sf::Sprite background_image_sprite_;
 
-public:
-    HUD();
-    void setFont(const std::string& fontPath);
-    sf::Text generatePlayerData(Tank tank);
-    void renderPlayerData(sf::RenderWindow& window, const std::vector<Tank>& players);
-    sf::RectangleShape createCenteredRedWindow();
+  public:
+    hud();
+    void set_font(const std::string &font_path);
+    sf::Text generate_player_data(tank tank) const;
+    void render_player_data(sf::RenderWindow &window, const std::vector<tank> &players) const;
+    static sf::RectangleShape create_centered_red_window();
 };

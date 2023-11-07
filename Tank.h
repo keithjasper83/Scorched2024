@@ -1,95 +1,95 @@
 #pragma once
 #include <string>
 
-class Tank
+class tank
 {
     struct
     {
         float x = 0;
         float y = 0;
-    } location;
+    } location_;
     struct
     {
         int index = 0;
-        std::string playerName = "A";
+        std::string player_name = "A";
         int health = 100;
         int ammo = 100;
         std::string weapon = "Cannon";
-        float startPower = 50.0f;
-        float maxPower = 100.0f;
-        float minPower = 1.0f;
-    } playerInfo;
+        float start_power = 50.0f;
+        float max_power = 100.0f;
+        float min_power = 1.0f;
+    } player_info_;
     struct
     {
-        float bodyX = 64.0f;
-        float bodyY = 64.0f;
-    } tankSize;
+        float body_x = 64.0f;
+        float body_y = 64.0f;
+    } tank_size_;
     struct
     {
         float angle = 270.0f;
         float width = 10.0f;
         float height = 60.0f;
-    } turret;
+    } turret_;
 
-public:
-    bool activePlayer = false;
-    bool onGround = false;
+  public:
+    bool active_player = false;
+    bool on_ground = false;
 
-    Tank();
+    tank() = default;
 
-    Tank(float x, float y, int index, std::string playerName);
+    tank(float x, float y, int index, const std::string& player_name);
 
-    void setOnGround(bool onGround);
+    void set_on_ground(bool on_ground);
 
-    bool getOnGround();
+    bool get_on_ground() const;
 
-    void setAngle(float angle);
+    void set_angle(float angle);
 
-    void incAngle();
+    void inc_angle();
 
-    void decAngle();
+    void dec_angle();
 
-    void incPower();
+    void inc_power();
 
-    void decPower();
+    void dec_power();
 
-    float getPower();
+    float get_power();
 
-    float getAngle();
+    float get_angle();
 
-    void normalizeAngle();
+    void normalize_angle();
 
-    void setLocation(float x, float y);
+    void set_location(float x, float y);
 
-    float getX();
+    float get_x() const;
 
-    float getY();
+    float get_y() const;
 
-    void Fire();
+    static void fire();
 
-    float getOriginX();
+    float get_origin_x() const;
 
-    float getOriginY();
+    float get_origin_y() const;
 
-    float getBodyX();
+    float get_body_x() const;
 
-    float getBodyY();
+    float get_body_y() const;
 
-    float getTurretX();
+    float get_turret_x() const;
 
-    float getTurretY();
+    float get_turret_y() const;
 
-    float getTurretWidth();
+    float get_turret_width() const;
 
-    float getTurretHeight();
+    float get_turret_height() const;
 
-    std::string getPlayerName();
+    std::string get_player_name();
 
-    int getIndex();
+    int get_index() const;
 
-    int getHealth();
+    int get_health() const;
 
-    int getAmmo();
+    int get_ammo() const;
 
-    std::string getWeaponName();
+    std::string get_weapon_name();
 };

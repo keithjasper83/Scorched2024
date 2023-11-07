@@ -1,14 +1,11 @@
 #pragma once
-#include <string>
 #include <fstream>
+#include <string>
 
-
-class FileSystem
+class file_system
 {
   public:
-    FileSystem() = default;
+    file_system() = default;
 
-    ~FileSystem() = default;
-
-    static bool fileExists(std::string FileName);
+    static bool file_exists(const std::string& file_name);
 };

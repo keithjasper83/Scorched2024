@@ -4,14 +4,14 @@
 #include "TerrainGenerator.h"
 #include <vector>
 
-class Physics {
+class physics {
 public:
-    Physics();
-    Physics(float gravity);
+    physics();
+    explicit physics(float gravity);
 
-    float getGravity();
+    float get_gravity() const;
 
-    void applyGravity(std::vector<Tank>& tanks, TerrainGenerator& terrain, sf::Time deltaTime);
+    static void apply_gravity(std::vector<tank>& tanks, terrain_generator& terrain);
 private:
-    float gravity;
+    float gravity_;
 };

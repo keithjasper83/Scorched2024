@@ -1,26 +1,24 @@
-
 #include "Scorched.h"
 
-
-Game::Game(int screenWidth, int screenHeight): renderer(screenWidth, screenHeight)
+game::game(const int screen_width, const int screen_height) : renderer_(screen_width, screen_height)
 {
     // Initialize your game objects, terrain data, etc.
-    this->screenWidth = screenWidth;
-    this->screenHeight = screenHeight;
+    this->screen_width_ = screen_width;
+    this->screen_height_ = screen_height;
 }
 
-void Game::run()
+void game::run()
 {
     srand(static_cast<unsigned>(time(0)));
-    renderer.start();
+    renderer_.start();
 }
 
-void Game::update()
+void game::update()
 {
     // Update game logic here
 }
 
-void Game::render()
+void game::render()
 {
     // renderer.renderTerrain(); // Call the rendering function from your Renderer
     //  Render other game objects
@@ -28,7 +26,7 @@ void Game::render()
 
 int main()
 {
-    Game game(constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT);
+    game game(constants::screen_width, constants::screen_height);
     game.run();
 
     return 0;

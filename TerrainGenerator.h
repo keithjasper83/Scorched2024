@@ -3,37 +3,37 @@
 #include "Config.h"
 #include <SFML/Graphics.hpp>
 
-class TerrainGenerator
+class terrain_generator
 {
   public:
-    struct Scale
+    struct scale
     {
         float x;
         float y;
     };
 
     sf::RenderWindow renderer;
-    sf::Texture terrainTexture;
-    sf::Sprite terrainSprite;
-    sf::Image terrainImage;
-    Scale scale;
+    sf::Texture terrain_texture;
+    sf::Sprite terrain_sprite;
+    sf::Image terrain_image;
+    scale window_scale;
 
-    TerrainGenerator();
-    TerrainGenerator(int width, int height);
-    void setScreenSize(int width, int height);
-    void updateSpriteSize();
-    sf::Image getTerrainImage();
-    int getFirstNonTransparentPixelinX(int x);
-    void updateTerrainWithCollision(int posX, int posY);
-    float getScreenWidth();
-    float getScreenHeight();
-    Scale getScale();
-    void updateScale();
-    void updateTerrainWithExlosion(int posX, int posY, int explosionSizeX, int explosionSizeY);
-    bool TransparentAtPixel(int x, int y);
-    sf::Sprite getTerrainSprite();
+    terrain_generator();
+    terrain_generator(int width, int height);
+    void set_screen_size(int width, int height);
+    void update_sprite_size();
+    sf::Image get_terrain_image();
+    int get_first_non_transparent_pixel_in_x(int x) const;
+    void update_terrain_with_collision(int pos_x, int pos_y);
+    float get_screen_width() const;
+    float get_screen_height() const;
+    scale get_scale() const;
+    void update_scale();
+    void update_terrain_with_explosion(int pos_x, int pos_y, int explosion_size_x, int explosion_size_y);
+    bool transparent_at_pixel(int x, int y) const;
+    sf::Sprite get_terrain_sprite();
 
   private:
-    int width = constants::SCREEN_WIDTH;
-    int height = constants::SCREEN_HEIGHT;
+    int width_ = constants::screen_width;
+    int height_ = constants::screen_height;
 };

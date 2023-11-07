@@ -1,80 +1,79 @@
 #include "HUD.h"
 
-
-HUD::HUD()
+hud::hud()
 {
-    if (!font.loadFromFile("Roboto-Bold.ttf"))
+    if (!font_.loadFromFile("Roboto-Bold.ttf"))
     {
         std::cout << "ERROR: Font not found" << std::endl;
     }
 
-    if (!backgroundImageTexture.loadFromFile("Images/hudBackground.png"))
+    if (!background_image_texture_.loadFromFile("Images/hudBackground.png"))
     {
         std::cout << "ERROR: Background image not found" << std::endl;
     }
-    backgroundImageSprite.setTexture(backgroundImageTexture);
+    background_image_sprite_.setTexture(background_image_texture_);
 }
 
-void HUD::setFont(const std::string& fontPath)
+void hud::set_font(const std::string &font_path)
 {
-    if (!font.loadFromFile(fontPath))
+    if (!font_.loadFromFile(font_path))
     {
         std::cout << "ERROR: Font not found" << std::endl;
     }
 }
 
-sf::Text HUD::generatePlayerData(Tank tank)
+sf::Text hud::generate_player_data(tank tank) const
 {
-    sf::Text playerHud;
-    playerHud.setFont(font);
-    playerHud.setCharacterSize(24);
-    if (tank.activePlayer)
+    sf::Text player_hud;
+    player_hud.setFont(font_);
+    player_hud.setCharacterSize(24);
+    if (tank.active_player)
     {
-        playerHud.setFillColor(sf::Color::Red);
+        player_hud.setFillColor(sf::Color::Red);
     }
     else
     {
-        playerHud.setFillColor(sf::Color::Black);
+        player_hud.setFillColor(sf::Color::Black);
     }
 
-    std::string playerName = "Name: " + tank.getPlayerName();
-    std::string playerHealth = " Health: " + std::to_string(tank.getHealth());
-    std::string playerPower = " Power: " + std::to_string(static_cast<int>(tank.getPower()));
-    std::string playerAngle = " Angle: " + std::to_string(static_cast<int>(tank.getAngle()));
-    std::string playerWeapon = " Weapon: " + tank.getWeaponName();
-    std::string playerAmmo = " Ammo: " + std::to_string(tank.getAmmo());
+    std::string player_name = "Name: " + tank.get_player_name();
+    std::string player_health = " Health: " + std::to_string(tank.get_health());
+    std::string player_power = " Power: " + std::to_string(static_cast<int>(tank.get_power()));
+    std::string player_angle = " Angle: " + std::to_string(static_cast<int>(tank.get_angle()));
+    std::string player_weapon = " Weapon: " + tank.get_weapon_name();
+    std::string player_ammo = " Ammo: " + std::to_string(tank.get_ammo());
 
-    std::string playerData = playerName + playerHealth + playerPower + playerAngle + playerAmmo + playerWeapon;
-    playerHud.setString(playerData);
+    std::string player_data = player_name + player_health + player_power + player_angle + player_ammo + player_weapon;
+    player_hud.setString(player_data);
 
     // Set the position based on player index or other criteria
     // playerHud.setPosition(x, y);
 
-    return playerHud;
+    return player_hud;
 }
 
-void HUD::renderPlayerData(sf::RenderWindow& window, const std::vector<Tank>& players)
+void hud::render_player_data(sf::RenderWindow &window, const std::vector<tank> &players) const
 {
-    window.draw(backgroundImageSprite);
+    window.draw(background_image_sprite_);
 
-    float yPosition = 10.0f; // Initial Y position
-    for (auto& player : players)
+    float y_position = 10.0f; // Initial Y position
+    for (auto &player : players)
     {
-        sf::Text playerLabel = generatePlayerData(player);
-        playerLabel.setPosition(10.0f, yPosition);
-        window.draw(playerLabel);
-        yPosition += 30.0f; // Increase Y position for the next player label
+        sf::Text player_label = generate_player_data(player);
+        player_label.setPosition(10.0f, y_position);
+        window.draw(player_label);
+        y_position += 30.0f; // Increase Y position for the next player label
     }
 }
 
-sf::RectangleShape HUD::createCenteredRedWindow()
+sf::RectangleShape hud::create_centered_red_window()
 {
-    sf::RectangleShape redWindow(sf::Vector2f(40, 40));
-    redWindow.setFillColor(sf::Color::Red);
+    sf::RectangleShape red_window(sf::Vector2f(40, 40));
+    red_window.setFillColor(sf::Color::Red);
 
-    constexpr float centerX = (1920 - 40) / 2.0f;
-    constexpr float centerY = (1280 - 40) / 2.0f;
-    redWindow.setPosition(centerX, centerY);
+    constexpr float center_x = (1920 - 40) / 2.0f;
+    constexpr float center_y = (1280 - 40) / 2.0f;
+    red_window.setPosition(center_x, center_y);
 
-    return redWindow;
+    return red_window;
 }

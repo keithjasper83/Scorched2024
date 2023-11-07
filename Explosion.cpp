@@ -1,64 +1,61 @@
 #include "Explosion.h"
 
+explosion::explosion(const float x, const float y, const float size, const sf::Time duration)
+{
+    position_.x = x;
+    position_.y = y;
+    explosion_size_ = size;
+    explosion_duration_ = duration;
+    active_ = true;
 
-Explosion::Explosion(float x, float y, float size, sf::Time duration)
+    // Customize the appearance of the explosion (you can set color, texture, etc.)
+    explosion_shape_.setRadius(explosion_size_);
+    explosion_shape_.setFillColor(sf::Color::Blue);
+    explosion_shape_.setOrigin(explosion_size_, explosion_size_); // Set the origin to the center
+    explosion_shape_.setPosition(position_);
+}
+
+void explosion::update(const sf::Time delta_time)
+{
+    // Update the explosion duration (you can modify other properties here)
+    explosion_duration_ -= delta_time;
+
+    if (explosion_duration_ <= sf::Time::Zero)
     {
-        position.x = x;
-        position.y = y;
-        explosionSize = size;
-        explosionDuration = duration;
-        active = true;
-
-        // Customize the appearance of the explosion (you can set color, texture, etc.)
-        explosionShape.setRadius(explosionSize);
-        explosionShape.setFillColor(sf::Color::Blue);
-        explosionShape.setOrigin(explosionSize, explosionSize); // Set the origin to the center
-        explosionShape.setPosition(position);
+        active_ = false; // Deactivate the explosion when it's done
     }
-
-    void Explosion::update(sf::Time deltaTime)
+    else
     {
-        // Update the explosion duration (you can modify other properties here)
-        explosionDuration -= deltaTime;
-
-        if (explosionDuration <= sf::Time::Zero)
-        {
-            active = false; // Deactivate the explosion when it's done
-        }
-        else
-        {
-            // printf("Projectile.cpp - Explosion::update - explosionDuration: %f\n", explosionDuration.asSeconds());
-        }
+        // printf("Projectile.cpp - Explosion::update - explosionDuration: %f\n", explosionDuration.asSeconds());
     }
+}
 
-    bool Explosion::isActive() const
+bool explosion::is_active() const
+{
+    return active_;
+}
+
+void explosion::render(sf::RenderWindow &window) const
+{
+    if (active_)
     {
-        return active;
+        // printf("Projectile.cpp - Explosion::render - active: %d\n", active);
+        // printf("Projectile.cpp - Explosion::render - position.x: %f\n", position.x);
+        // printf("Projectile.cpp - Explosion::render - position.y: %f\n", position.y);
+        window.draw(explosion_shape_);
     }
-
-    void Explosion::render(sf::RenderWindow& window) const
+    else
     {
-        if (active)
-        {
-            // printf("Projectile.cpp - Explosion::render - active: %d\n", active);
-            // printf("Projectile.cpp - Explosion::render - position.x: %f\n", position.x);
-            // printf("Projectile.cpp - Explosion::render - position.y: %f\n", position.y);
-            window.draw(explosionShape);
-        }
-        else
-        {
-            // printf("Projectile.cpp - Explosion::render - active: %d\n", active);
-        }
+        // printf("Projectile.cpp - Explosion::render - active: %d\n", active);
     }
+}
 
-    sf::Vector2f Explosion::getPosition() const
-    {
-        return this->position;
-    }
+sf::Vector2f explosion::get_position() const
+{
+    return this->position_;
+}
 
-    float Explosion::getExplosionSize() const
-    {
-        return this->explosionSize;
-    }
-
-
+float explosion::get_explosion_size() const
+{
+    return this->explosion_size_;
+}

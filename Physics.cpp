@@ -1,45 +1,43 @@
-#pragma once
-
 #include "Physics.h"
 
-
-Physics::Physics()
+physics::physics()
 {
-    this->gravity = constants::GRAVITY;
+    this->gravity_ = constants::gravity;
 }
-Physics::Physics(float gravity) : gravity(gravity)
+physics::physics(const float gravity) : gravity_(gravity)
 {
     // Constructor logic, if any
-    this->gravity = gravity;
+    this->gravity_ = gravity;
 }
 
-float Physics::getGravity()
+float physics::get_gravity() const
 {
-    return this->gravity;
+    return this->gravity_;
 }
 
-void Physics::applyGravity(std::vector<Tank>& tanks, TerrainGenerator& terrain, sf::Time deltaTime)
+void physics::apply_gravity(std::vector<tank> &tanks, terrain_generator &terrain)
 {
-    for (Tank& tank : tanks)
+    for (tank &tank : tanks)
     {
-        if (!tank.getOnGround())
+        if (!tank.get_on_ground())
         {
-            float pixelsPerSecond = 10.0f; // Adjust this value to control the falling
-            terrain.updateScale();
-            float scale = terrain.getScale().y;
-            float xScale = terrain.getScale().x;
-            float groundHeight = terrain.getFirstNonTransparentPixelinX(static_cast<int>(tank.getX() / xScale));
-            float scaledGroundHeight = groundHeight * scale;
-            float oldLocation = tank.getY();
-            float newLocation = oldLocation + pixelsPerSecond;
-            if (scaledGroundHeight <= oldLocation)
+            constexpr float pixels_per_second = 10.0f; // Adjust this value to control the falling
+            terrain.update_scale();
+            const float scale = terrain.get_scale().y;
+            const float x_scale = terrain.get_scale().x;
+            const float ground_height =
+                terrain.get_first_non_transparent_pixel_in_x(static_cast<int>(tank.get_x() / x_scale));
+            const float scaled_ground_height = ground_height * scale;
+            const float old_location = tank.get_y();
+            const float new_location = old_location + pixels_per_second;
+            if (scaled_ground_height <= old_location)
             {
-                tank.setOnGround(true);
+                tank.set_on_ground(true);
             }
             else
             {
-                tank.setLocation(tank.getX(), newLocation);
-                tank.setOnGround(false);
+                tank.set_location(tank.get_x(), new_location);
+                tank.set_on_ground(false);
             }
         }
     }
