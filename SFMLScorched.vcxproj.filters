@@ -59,6 +59,9 @@
     <ClCompile Include="Explosion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="backgroud_particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scorched.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="background_particles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

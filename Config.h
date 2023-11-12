@@ -16,4 +16,6 @@ constexpr int screen_width = 1280;               // sets the screen width (windo
 constexpr int screen_height = 720;               // sets the screen height (windowed mode)
 constexpr int projectile_speed = 5.0f;           // sets the projectile speed
 constexpr bool enable_physics = true;            // sets the physics to true
+constexpr int particle_count = 100;              // sets the wind to true
+constexpr bool enable_particles = true;          // sets the particles to render
 } // namespace constants

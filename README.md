@@ -2,6 +2,11 @@
 A simple Scorched Earth clone written in C++ using SFML.
 Every publish of this project will be a "working" version, it may be buggy but will always work when compiled and ran with the latest version of Visual Studio.
 
+## ChangeLog
+ 	- Implemented atmospheric particles (think snow or dust or rain) 12-11-2023
+
+
+
 ## A work in progress
 Due to the nature of this project, it is a work in progress. I will be adding features as I go along.
 However, I will only be maintaining this occasionally as an excercise in "because I can", the main version of this game and activly supported will be made in Unity Framework for a more consistent and easier to maintain version for cross compatability with multiple devices.

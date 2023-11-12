@@ -1,6 +1,8 @@
 #pragma once
 #include "Renderer.h"
 
+#include "background_particles.h"
+
 renderer::renderer(const int screen_width, const int screen_height)
 {
     this->screen_width = screen_width;
@@ -20,13 +22,14 @@ renderer::renderer(const int screen_width, const int screen_height)
     frame_time_buffer.resize(100, 0.0f); // Resize the buffer to 100 elements
     // set this from game menu (2 is default)
     set_player_count(2);
+    background_particles particles;
 }
 
 void renderer::create_window()
 {
     if (this->fullscreen)
     {
-        window.create(sf::VideoMode::getDesktopMode(), window_title, sf::Style::Fullscreen, settings);
+        window.create(sf::VideoMode::getDesktopMode(), window_title, sf::Style::Default, settings);
     }
     else
     {
@@ -93,6 +96,7 @@ void renderer::load_terrain_image(const std::string &image)
 void renderer::restart_game()
 {
     terrain_generator generator(this->screen_width, this->screen_height);
+
     create_players();
 }
 
@@ -101,9 +105,13 @@ void renderer::start()
     size_t frame_index = 0;      // Index of the current frame time
     float frame_time_sum = 0.0f; // Sum of the frame times
     create_players();            // Create the players
-    set_frame_limits();          // Set the frame limits
+    set_frame_limits();
+    // Set the frame limits
+    particles.set_screen_dimensions(this->window_width, this->window_height);
+
     while (window.isOpen())
     {
+        // particles.update(&particle_vector);
         delta_time = clock.restart(); // Restart the clock and save the elapsed time into deltaTime
         update_window_size();         // Update the window size
         handle_events();              // Handle events
@@ -169,12 +177,14 @@ void renderer::toggle_full_screen()
     {
         window.create(sf::VideoMode::getDesktopMode(), constants::game_title, sf::Style::Fullscreen);
         terrain_obj.set_screen_size(window.getSize().x, window.getSize().y);
+        particles.set_screen_dimensions(window.getSize().x, window.getSize().y);
         restart_game();
     }
     else
     {
         window.create(sf::VideoMode(screen_width, screen_height), constants::game_title, sf::Style::Default);
         terrain_obj.set_screen_size(window.getSize().x, window.getSize().y);
+        particles.set_screen_dimensions(window.getSize().x, window.getSize().y);
         restart_game();
     }
     set_frame_limits();
@@ -265,6 +275,15 @@ void renderer::handle_events()
                     this->enable_physics = true;
                 }
                 break;
+            case sf::Keyboard::I:
+                if (this->enable_particles)
+                {
+                    this->enable_particles = false;
+                }
+                else
+                {
+                    this->enable_particles = true;
+                }
             default:
                 break;
             }
@@ -379,14 +398,17 @@ void renderer::render()
     {
         generate_tank(player); // Call the function to render the tank
     }
-    render_hud.render_player_data(window, players);
-    window.draw(render_hud.create_centered_red_window());
-    render_projectiles();
-    render_explosions();
 
-    // renderHUD(players);
-    render_fps();
-    render_grid_lines(100); // Render the grid the int specified sets the pixel size of the grid
+    render_projectiles();
+    if (this->enable_particles)
+    {
+        window.draw(particles.render());
+    }
+
+    render_explosions();                            // Render the explosions
+    render_hud.render_player_data(window, players); // Render the player data
+    render_fps();                                   // Render the FPS
+    render_grid_lines(100);                         // Render the grid the int specified sets the pixel size of the grid
     window.display();
 }
 

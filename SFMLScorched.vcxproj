@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="backgroud_particles.cpp" />
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="HUD.cpp" />
@@ -150,6 +151,7 @@
     </Font>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="background_particles.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="FileSystem.h" />

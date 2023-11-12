@@ -14,6 +14,7 @@
 #include "SoundManager.h"
 #include "Tank.h"
 #include "TerrainGenerator.h"
+#include "background_particles.h"
 #include <random>
 
 class renderer
@@ -23,7 +24,7 @@ class renderer
     bool render_grid = constants::render_grid;        // convert from config.h to a variable
     bool show_fps = constants::show_fps;              // convert from config.h to a variable
     bool beta_terrain = constants::beta_terrain;      // todo: perhaps not needed?
-    terrain_generator terrain_obj;                     // create terrain object
+    terrain_generator terrain_obj;                    // create terrain object
     sf::RenderStates render_state;                    // Render state for the window
     sf::ContextSettings settings;                     // Settings for the window
     std::string window_title = constants::game_title; // Window title
@@ -42,7 +43,7 @@ class renderer
     int window_height;                                // Window height in pixels
     // todo: try and clean up all these screen and window variables
     physics physics;                                 // Physics class
-    sound_manager sounds_obj;                         // Sound manager class
+    sound_manager sounds_obj;                        // Sound manager class
     bool is_dragging = false;                        // mouse dragging - defaults to off, mouse functions then use this.
     bool enable_physics = constants::enable_physics; // toggle physics simulation
     std::vector<projectile> projectiles;             // Vector of projectiles
@@ -51,6 +52,10 @@ class renderer
     int player_count = 0;                            // Player count
     sf::VertexArray projectile_path;                 // Vertex array for the projectile path
     hud render_hud;                                  // HUD class
+    background_particles particles;                  // Background particles
+    bool enable_particles = constants::enable_particles; // toggle background particles
+
+    // HUD class
 
     ///< summary>
     // Constructor for the renderer
