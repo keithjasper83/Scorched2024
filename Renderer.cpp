@@ -461,9 +461,11 @@ void renderer::create_players()
     printf("Creating %d players\n", get_player_count());
     const int second_location = window.getSize().x - 50;
     const int player_start_locations[2] = {50, second_location};
+    constexpr int player_start_angles[2] = {225, 135};
     for (int i = 0; i < get_player_count(); ++i)
     {
         auto tanks = tank(player_start_locations[i], 100.0f, i + 1, "Player " + std::to_string(i + 1));
+        tanks.set_angle(player_start_angles[i]);
         players.push_back(tanks);
     }
 }
@@ -540,15 +542,32 @@ void renderer::generate_tank(tank tank)
     //  Draw both the tank and turret
     window.draw(tank_sprite);
     window.draw(turret_sprite);
+    get_turret_projectile_origin(tank);
 }
 
-void renderer::queue_render_explosion(projectile projectile)
+void renderer::queue_render_explosion(const projectile &projectile)
 {
-    sf::Time duration = sf::seconds(2.0f);
-    explosion explosion(projectile.get_x(), projectile.get_y(), 40.0f, duration);
+    const sf::Time duration = sf::seconds(2.0f);
+    const explosion explosion(projectile.get_x(), projectile.get_y(), 40.0f, duration);
     terrain_obj.update_terrain_with_explosion(projectile.get_x(), projectile.get_y(),
                                               explosion.get_explosion_size() * 3, explosion.get_explosion_size() * 3);
     explosions.push_back(explosion);
+}
+
+sf::Vector2f renderer::get_turret_projectile_origin(tank &tank)
+{
+
+    const sf::Vector2f tank_top_center(tank.get_x(), tank.get_y() - tank.get_body_y() / 2.0f);
+
+    // Calculate the offset based on the turret's angle
+    const float turret_angle_radians = -tank.get_angle() * (3.14159265f / 180.0f);
+    const float turret_length = tank.get_turret_height();
+    const sf::Vector2f turret_tip_offset(turret_length * std::sin(turret_angle_radians),
+                                         turret_length * std::cos(turret_angle_radians));
+
+    // Calculate the position of the second point relative to the top center of the tank
+    const sf::Vector2f turret_tip_position = tank_top_center + turret_tip_offset;
+    return turret_tip_position;
 }
 
 void renderer::fire_projectile(tank tank)
@@ -558,33 +577,10 @@ void renderer::fire_projectile(tank tank)
     projectile cannon(tank);
     cannon.set_explosion_duration(3.0f);
     sounds_obj.fire(); // play sound (debug)
-    // Determine the initial position (initialX and initialY) and launch angle
-    float initial_x = static_cast<int>(calculate_projectile_origin_x(tank)); // Set your desired initial X position
-    float initial_y =
-        static_cast<int>(calculate_projectile_origin_y(tank, cannon)); // Set your desired initial Y position
-    float launch_angle = tank.get_angle();                             // Set your desired launch angle in degrees
+    const float launch_angle =
+        tank.get_angle() - 90.0f; // Set your desired launch angle in degrees and correct 90 degrees
 
-    cannon.launch(initial_x, initial_y, launch_angle - 90);
+    cannon.launch(get_turret_projectile_origin(tank).x, get_turret_projectile_origin(tank).y, launch_angle);
     // Add the projectile to the container
     projectiles.push_back(cannon);
-}
-
-int renderer::calculate_projectile_origin_x(tank tank)
-{
-    // Calculate the origin of the projectile considering turret rotation, width, and the tip of the turret
-    const float half_turret_width = tank.get_turret_width() / 2.0f;
-    const float turret_tip_offset_x = half_turret_width * std::cos((tank.get_angle() + 90.0f) * M_PI / 180.0f);
-    const int origin_x = tank.get_x() - static_cast<int>(turret_tip_offset_x);
-    return origin_x;
-}
-
-int renderer::calculate_projectile_origin_y(tank tank, projectile &projectile)
-{
-    // Calculate the origin of the projectile at the tip of the turret
-    const float half_turret_width = tank.get_turret_width() / 2.0f;
-    const float half_projectile_size = projectile.get_width() / 2.0f;
-    const float turret_tip_offset_y = -(tank.get_turret_height() / 2.0f); // Adjusted here
-    const int origin_y = tank.get_y() - (tank.get_body_y() - static_cast<int>(turret_tip_offset_y)) -
-                         static_cast<int>(half_turret_width + half_projectile_size);
-    return origin_y;
 }

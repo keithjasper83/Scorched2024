@@ -20,6 +20,12 @@
 class renderer
 {
   public:
+    struct
+    {
+        int x = 0;
+        int y = 0;
+    } fire_origin;
+
     bool fullscreen = constants::fullscreen;          // convert from config.h to a variable
     bool render_grid = constants::render_grid;        // convert from config.h to a variable
     bool show_fps = constants::show_fps;              // convert from config.h to a variable
@@ -210,7 +216,7 @@ class renderer
     // todo: perhaps move to the explosion class? or projectile class for expandability, there is no rendering here.
     // other than the terrain update?
     /// <param name="projectile"></param>
-    void queue_render_explosion(projectile projectile);
+    void queue_render_explosion(const projectile &projectile);
 
     /// <summary>
     /// Update the FPS counter stats
@@ -288,4 +294,6 @@ class renderer
     /// <para>Renders the label for frame rate</para>
     /// </summary>
     void render_fps();
+
+    static sf::Vector2f get_turret_projectile_origin(tank &tank);
 };

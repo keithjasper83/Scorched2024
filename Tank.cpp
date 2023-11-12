@@ -8,7 +8,7 @@ tank::tank(const float x, const float y, const int index, const std::string &pla
     player_info_.index = index;
 }
 
-void tank::set_on_ground(bool on_ground)
+void tank::set_on_ground(const bool on_ground)
 {
     this->on_ground = on_ground;
 }
@@ -27,11 +27,13 @@ void tank::set_angle(const float angle)
 void tank::inc_angle()
 {
     turret_.angle++;
+    normalize_angle();
 }
 
 void tank::dec_angle()
 {
     turret_.angle--;
+    normalize_angle();
 }
 
 void tank::inc_power()
@@ -57,9 +59,8 @@ float tank::get_power()
     return player_info_.start_power;
 }
 
-float tank::get_angle()
+float tank::get_angle() const
 {
-    normalize_angle();
     return turret_.angle;
 }
 
@@ -67,15 +68,15 @@ void tank::normalize_angle()
 {
     if (turret_.angle > 360)
     {
-        turret_.angle = 0;
+        turret_.angle = 360;
     }
     if (turret_.angle < 0)
     {
-        turret_.angle = 360;
+        turret_.angle = 0;
     }
 }
 
-void tank::set_location(float x, float y)
+void tank::set_location(const float x, const float y)
 {
     // printf("Tank.cpp - Player: %s setLocation: %f, %f\n", getPlayerName().c_str(), x, y);
     location_.x = x;
@@ -164,4 +165,14 @@ int tank::get_ammo() const
 std::string tank::get_weapon_name()
 {
     return player_info_.weapon;
+}
+
+// Function to get the position of the tip of the turret
+sf::Vector2f tank::get_turret_tip_position() const
+{
+    // Calculate the position of the tip of the turret based on tank position and turret dimensions
+    const float tip_x = location_.x + tank_size_.body_x - turret_.height * std::cos(turret_.angle);
+    const float tip_y = location_.y + tank_size_.body_y - turret_.height * std::sin(turret_.angle);
+
+    return {tip_x, tip_y};
 }

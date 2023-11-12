@@ -1,4 +1,6 @@
 #pragma once
+#include "SFML/Graphics.hpp"
+#include <cmath>
 #include <string>
 
 class tank
@@ -26,7 +28,7 @@ class tank
     } tank_size_;
     struct
     {
-        float angle = 270.0f;
+        float angle = 225.0f;
         float width = 10.0f;
         float height = 60.0f;
     } turret_;
@@ -37,7 +39,7 @@ class tank
 
     tank() = default;
 
-    tank(float x, float y, int index, const std::string& player_name);
+    tank(float x, float y, int index, const std::string &player_name);
 
     void set_on_ground(bool on_ground);
 
@@ -55,7 +57,7 @@ class tank
 
     float get_power();
 
-    float get_angle();
+    float get_angle() const;
 
     void normalize_angle();
 
@@ -92,4 +94,5 @@ class tank
     int get_ammo() const;
 
     std::string get_weapon_name();
+    sf::Vector2f get_turret_tip_position() const;
 };
