@@ -1,5 +1,3 @@
-#pragma once
-
 #include "TerrainGenerator.h"
 
 struct terrain_generator::scale scale;
@@ -14,16 +12,38 @@ terrain_generator::terrain_generator()
     // Create a sprite for the terrain
     const sf::Sprite terrain_sprite(terrain_texture);
     this->terrain_sprite = terrain_sprite;
+    this->terrain_sprite_master = this->terrain_sprite;
 
     const sf::Image terrain_image = terrain_texture.copyToImage();
     this->terrain_image = terrain_image;
+    this->terrain_image_master = terrain_image;
+
+    update_scale();
+
+    update_sprite_size();
+
+    KJ::debug_output::print(__FILE__,
+                            "Terrain Image Size : " + std::to_string(terrain_image.getSize().x) + "x" +
+                                std::to_string(terrain_image.getSize().y),
+                            KJ::debug_output::MessageType::WARNING);
+    KJ::debug_output::print(__FILE__, "Updating Pixel Array", KJ::debug_output::MessageType::WARNING);
+
+    update_pixel_array(this->get_scale().x, this->get_scale().y);
+    KJ::debug_output::print(__FILE__, &"PixelMap Size: "[pixel_map.size()], KJ::debug_output::MessageType::WARNING);
 }
+
 terrain_generator::terrain_generator(const int width, const int height)
 {
     // init height
     this->width_ = width;
     this->height_ = height;
     set_screen_size(width, height);
+}
+
+void terrain_generator::reset_terrain()
+{
+    this->terrain_sprite = this->terrain_sprite_master;
+    this->terrain_image = this->terrain_image_master;
 }
 
 void terrain_generator::set_screen_size(const int width, const int height)
@@ -50,10 +70,11 @@ void terrain_generator::update_sprite_size()
 
     // Set the scale for the terrain sprite
     terrain_sprite.setScale(scale_x, scale_y);
+    terrain_sprite_master.setScale(scale_x, scale_y);
     // this->terrainSprite.setScale(this->width / 800.0f, this->height / 600.0f);
 }
 
-sf::Image terrain_generator::get_terrain_image()
+sf::Image terrain_generator::get_terrain_image() const
 {
     // for (int x = 0; x < this->terrainImage.getSize().x; x++) {
     // int floorheight = getFirstNonTransparentPixelinX(x);
@@ -135,6 +156,14 @@ void terrain_generator::update_terrain_with_explosion(int pos_x, int pos_y, cons
     const float terrain_width = static_cast<float>(terrain_image.getSize().x) / window_scale.x;
     const float terrain_height = static_cast<float>(terrain_image.getSize().y) / window_scale.y;
 
+    if (pos_x < 0)
+    {
+        pos_x = 20;
+    }
+    if (pos_y < 0)
+    {
+        pos_y = 20;
+    }
     for (int x = 0; x < explosion_size_x; x++)
     {
         for (int y = 0; y < explosion_size_y; y++)
@@ -146,12 +175,17 @@ void terrain_generator::update_terrain_with_explosion(int pos_x, int pos_y, cons
 
             if (circle_x * circle_x + circle_y * circle_y <= explosion_x_half * explosion_y_half)
             {
-                const int terrain_x = static_cast<int>(pos_x / window_scale.x + x - explosion_x_half);
-                const int terrain_y = static_cast<int>(pos_y / window_scale.y + y - explosion_y_half);
+                int terrain_x = static_cast<int>(pos_x / window_scale.x + x - explosion_x_half);
+                int terrain_y = static_cast<int>(pos_y / window_scale.y + y - explosion_y_half);
 
                 // Check if the terrain coordinates are within bounds
-                if (terrain_x >= 0 && terrain_x < terrain_width && terrain_y >= 0 && terrain_y < terrain_height)
+                if (terrain_x >= 0 && terrain_x < terrain_width && terrain_y >= 0 && terrain_y < terrain_height - 65)
                 {
+                    if (terrain_x < 0 || terrain_y < 0)
+                    {
+                        terrain_x = get_screen_width();
+                        terrain_y = get_screen_height();
+                    }
                     terrain_image.setPixel(terrain_x, terrain_y, sf::Color::Transparent);
                 }
             }
@@ -170,7 +204,47 @@ bool terrain_generator::transparent_at_pixel(const int x, const int y) const
     return pixel.a != 0;
 }
 
-sf::Sprite terrain_generator::get_terrain_sprite()
+void terrain_generator::update_pixel_array(float x_scale, float y_scale)
+{
+    // todo : investigate this
+    // update_pixel_array_flag = true;
+    // update_scale();
+
+    //// Run the update_pixel_array function in a separate thread
+    // std::thread updateThread([this, x_scale, y_scale]() {
+    //     pixel_map.clear();
+
+    //    const int width = terrain_texture.getSize().x * x_scale;
+    //    const int height = terrain_texture.getSize().y * y_scale;
+
+    //    sf::Image image = terrain_texture.copyToImage(); // Get the image data once
+
+    //    for (int x = 0; x < width; x++)
+    //    {
+    //        for (int y = 0; y < height; y++)
+    //        {
+    //            const sf::Color pixel = image.getPixel(x, y);
+    //            if (pixel.a != 0 && pixel.r < 1 && pixel.g < 1 && pixel.b < 1)
+    //            {
+    //                pixel_map.push_back(sf::Vector3f(x, y, pixel.a));
+    //                KJ::debug_output::print("Not Transparent at " << x << ", " << y);
+    //            }
+    //        }
+    //    }
+    //    KJ::debug_output::print("PixelMap Size: " << pixel_map.size());
+
+    //    update_pixel_array_flag = false;
+    //});
+
+    // updateThread.detach(); // Detach the thread to run independently
+}
+
+sf::Sprite terrain_generator::get_terrain_sprite() const
 {
     return this->terrain_sprite;
+}
+
+int terrain_generator::get_pixel_map_size()
+{
+    return pixel_map.size();
 }

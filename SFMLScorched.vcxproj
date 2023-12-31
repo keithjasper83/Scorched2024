@@ -106,10 +106,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,14 +135,18 @@
     <ClCompile Include="backgroud_particles.cpp" />
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="game_state_controller.cpp" />
     <ClCompile Include="HUD.cpp" />
+    <ClCompile Include="menu_screens.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="ProjectileCannon.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scorched.cpp" />
     <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="animated_sprite.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="TerrainGenerator.cpp" />
+    <ClCompile Include="window_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -151,10 +158,13 @@
     </Font>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="animated_sprite.h" />
     <ClInclude Include="background_particles.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="debug_output.h" />
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="game_state_controller.h" />
     <ClInclude Include="HUD.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="ProjectileCannon.h" />
@@ -163,6 +173,7 @@
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Tank.h" />
     <ClInclude Include="TerrainGenerator.h" />
+    <ClInclude Include="window_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ResourcesAudio.rc" />
@@ -171,18 +182,45 @@
     <Image Include="Images\hudBackground.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Images\icon-master.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Images\menu_background.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="Images\rock1.jpg">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="Images\sky1.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Images\snowflake.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Images\tank-army.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Images\tank-green.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Images\tank.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="Images\Terrain\overlay.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Images\turret-army.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Images\turret.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="Sounds\9mm-pistol-shoot-short-reverb-7152.wav">
+      <DeploymentContent>true</DeploymentContent>
+    </Media>
+    <Media Include="Sounds\cogs.wav">
       <DeploymentContent>true</DeploymentContent>
     </Media>
     <Media Include="Sounds\mixkit-blast-hit-with-echo-2186.wav">

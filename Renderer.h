@@ -1,5 +1,6 @@
-#pragma once
 
+#pragma once
+#include "debug_output.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -15,7 +16,11 @@
 #include "Tank.h"
 #include "TerrainGenerator.h"
 #include "background_particles.h"
+#include "game_state_controller.h"
+#include "window_manager.h"
 #include <random>
+
+#include "menu_screens.cpp"
 
 class renderer
 {
@@ -26,6 +31,8 @@ class renderer
         int y = 0;
     } fire_origin;
 
+    window_manager _window_manager;
+    int currentPlayer = 0;
     bool fullscreen = constants::fullscreen;          // convert from config.h to a variable
     bool render_grid = constants::render_grid;        // convert from config.h to a variable
     bool show_fps = constants::show_fps;              // convert from config.h to a variable
@@ -43,10 +50,8 @@ class renderer
     sf::Text fps_text;                                // Text for rendering FPS
     std::vector<int> terrain;                         // todo: perhaps not needed?
     std::vector<float> frame_time_buffer;             // Buffer to store frame times for averaging
-    int screen_width;                                 // Screen width in pixels
-    int screen_height;                                // Screen height in pixels
-    int window_width;                                 // Window width in pixels
-    int window_height;                                // Window height in pixels
+
+    sf::Vector2i mousePosition;
     // todo: try and clean up all these screen and window variables
     physics physics;                                 // Physics class
     sound_manager sounds_obj;                        // Sound manager class
@@ -59,7 +64,16 @@ class renderer
     sf::VertexArray projectile_path;                 // Vertex array for the projectile path
     hud render_hud;                                  // HUD class
     background_particles particles;                  // Background particles
-    bool enable_particles = constants::enable_particles; // toggle background particles
+    bool enable_particles = constants::enable_particles;     // toggle background particles
+    sf::Texture tank_texture = tank::get_tank_texture();     // generate tank texture
+    sf::Texture turret_texture = tank::get_turret_texture(); // generate turret texture
+    bool display_menu = constants::display_menu;             // Display the menu
+    bool display_settings_menu = false;
+
+    window_manager::canvas_resolution canvas_resolution;
+    window_manager::display_resolution display_resolution;
+
+    game_state_controller game_state;
 
     // HUD class
 
@@ -75,11 +89,15 @@ class renderer
     ///</summary>
     void create_window();
 
+    void rotatePlayerTurn();
+    void checkWinState();
+
     ///< summary>
     // Load the font assets
     ///</summary>
     void load_font_assets();
 
+    void set_icon(sf::RenderWindow &window);
     ///< summary>
     // Define the settings for the render window
     ///</summary>
@@ -132,16 +150,6 @@ class renderer
     void run_gravity_simulation();
 
     ///< summary>
-    // Update the window size
-    //
-    // This function updates the window size variables to match the current window size
-    //
-    // this->windowWidth and this->windowHeight are used to store the current window size and should be used where
-    // possible to ensure the correct size is used
-    ///</summary>
-    void update_window_size();
-
-    ///< summary>
     // Set the frame limits
     //
     // This function sets the frame limits for the window, settings are stored in config.h
@@ -162,7 +170,7 @@ class renderer
     ///< para>Toggle the fullscreen state</para>
     ///< para>Toggles and sets the fullscreen state, also recreates the window to apply the changes</para>
     ///</summary>
-    void toggle_full_screen();
+    void toggle_full_screen(bool startFull = false);
 
     /// <summary>
     /// <para>Handles user input events</para>
@@ -240,6 +248,8 @@ class renderer
     /// <para>- Grid</para>
     /// </summary>
     void render();
+    void display_menu_render();
+    void display_menu_render() const;
 
     /// <summary>
     /// <para>Generate a texture for the tank</para>
@@ -295,5 +305,14 @@ class renderer
     /// </summary>
     void render_fps();
 
-    static sf::Vector2f get_turret_projectile_origin(tank &tank);
+    sf::Vector2f get_turret_projectile_origin(tank &tank);
+
+    void render_pixel_map_size();
+
+    void collide_with_terrain(projectile &projectile);
+
+    sf::FloatRect render_tank_hitbox(tank &tank);
+    void debug_display_hitboxes();
+    void detect_tank(projectile &projectile);
+    void collide_with_tank(int player_index, projectile projectile);
 };

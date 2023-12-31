@@ -1,4 +1,5 @@
 #pragma once
+#include "debug_output.h" 
 #include "SFML/Graphics.hpp"
 #include "Tank.h"
 #include "TerrainGenerator.h"

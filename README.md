@@ -3,19 +3,32 @@ A simple Scorched Earth clone written in C++ using SFML.
 Every publish of this project will be a "working" version, it may be buggy but will always work when compiled and ran with the latest version of Visual Studio.
 
 ## ChangeLog
- 	- Implemented atmospheric particles (think snow or dust or rain) 12-11-2023
-    - Fixed projectile launch origin to be the end of the turret barrel 12-11-2023
-    - Altered default turret angle for Players 12-11-2023
-    - Fixed some const declarations on functions and variables - more to follow 12-11-2023
+19th November 2023
+
+    - Added a menu system
+
+13th November 2023
+
+     - Added animation class and implemented for background particles
+
+
+12th November 2023
+
+ 	- Implemented atmospheric particles (think snow or dust or rain), currently only snow (ish)
+    - Fixed projectile launch origin to be the end of the turret barrel
+    - Altered default turret angle for Players
+    - Fixed some const declarations on functions and variables - more to follow
 
 
 ## ToDo
- - Add a menu system
+ - Update Menu system to have a settings page (accepting inputs/toggles etc)
+ - Add player names (and ability to set)
+ - Add player colours (and ability to set)
+ 
+ - Fix animation framerates, they are currently not consistent
  - Add a game over screen
  - Add a game win screen
  - Add player rotation
- - Add player names (and ability to set)
- - Add player colours (and ability to set)
  - Add player scores - and implemnt a scoring system
  - Add a wind system
  - Add a wind direction indicator
@@ -62,7 +75,7 @@ However, please check out my other projects as these are likley to be more activ
 
 ## InGame Keyboard Shortcuts
 * `F5` - Toggle Fullscreen
-* `Esc` - Exit Fullscreen
+* `Q` - Quit Game
 * `P` - Play Test sound
 * `F1` - Reset Game
 * `G` - Toggle Pixel Grid
@@ -76,3 +89,4 @@ However, please check out my other projects as these are likley to be more activ
 * `I` - Enable Atmospheric Particles
 * `Mouse Click` - Remove Terrain at Location
 * `Mouse Drag` - Remove Terrain in Area
+* `ESC` - Display Menu

@@ -62,10 +62,22 @@
     <ClCompile Include="backgroud_particles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="animated_sprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="menu_screens.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_state_controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="window_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="README.md" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h">
@@ -104,6 +116,18 @@
     <ClInclude Include="background_particles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="animated_sprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_state_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="window_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Roboto-Bold.ttf">
@@ -128,12 +152,39 @@
     <Image Include="Images\hudBackground.png">
       <Filter>Resource Files\Images</Filter>
     </Image>
+    <Image Include="Images\snowflake.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\tank.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\tank-green.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\turret.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\tank-army.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\turret-army.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\menu_background.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Images\icon-master.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="Sounds\9mm-pistol-shoot-short-reverb-7152.wav">
       <Filter>Resource Files\Sounds</Filter>
     </Media>
     <Media Include="Sounds\mixkit-blast-hit-with-echo-2186.wav">
+      <Filter>Resource Files\Sounds</Filter>
+    </Media>
+    <Media Include="Sounds\cogs.wav">
       <Filter>Resource Files\Sounds</Filter>
     </Media>
   </ItemGroup>

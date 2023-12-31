@@ -2,14 +2,14 @@
 
 hud::hud()
 {
-    if (!font_.loadFromFile("Roboto-Bold.ttf"))
+    if (!font_.loadFromFile(constants::font_file))
     {
-        std::cout << "ERROR: Font not found" << std::endl;
+        KJ::debug_output::print(__FILE__, " Font not found", KJ::debug_output::MessageType::FATAL);
     }
 
     if (!background_image_texture_.loadFromFile("Images/hudBackground.png"))
     {
-        std::cout << "ERROR: Background image not found" << std::endl;
+        KJ::debug_output::print(__FILE__, "Background image not found", KJ::debug_output::MessageType::FATAL);
     }
     background_image_sprite_.setTexture(background_image_texture_);
 }
@@ -18,7 +18,7 @@ void hud::set_font(const std::string &font_path)
 {
     if (!font_.loadFromFile(font_path))
     {
-        std::cout << "ERROR: Font not found" << std::endl;
+        KJ::debug_output::print(__FILE__, "Font not found");
     }
 }
 
@@ -76,4 +76,14 @@ sf::RectangleShape hud::create_centered_red_window()
     red_window.setPosition(center_x, center_y);
 
     return red_window;
+}
+
+sf::Text hud::set_winner(std::string playerName)
+{
+    sf::Text winner;
+    winner.setFont(font_);
+    winner.setCharacterSize(24);
+    winner.setFillColor(sf::Color::Red);
+    winner.setString(playerName + " wins!");
+    return winner;
 }

@@ -20,7 +20,8 @@ bool tank::get_on_ground() const
 
 void tank::set_angle(const float angle)
 {
-    printf("Tank.cpp - Player: %s setAngle: %f\n", get_player_name().c_str(), angle);
+    KJ::debug_output::print(__FILE__, "Player: " + get_player_name() + " setAngle: " + std::to_string(angle),
+                            KJ::debug_output::MessageType::INFO);
     turret_.angle = angle;
 }
 
@@ -95,7 +96,7 @@ float tank::get_y() const
 
 void tank::fire()
 {
-    printf("Tank.cpp - FIRE!\n");
+    KJ::debug_output::print(__FILE__, "FIRE!", KJ::debug_output::MessageType::GOOD);
     // Create a new projectile and add it to the container
 
     // Now, you can tell the renderer to draw the projectiles
@@ -104,12 +105,12 @@ void tank::fire()
 
 float tank::get_origin_x() const
 {
-    return tank_size_.body_x / 2.0f;
+    return tank_size_.body_x;
 }
 
 float tank::get_origin_y() const
 {
-    return tank_size_.body_y / 2.0f;
+    return tank_size_.body_y;
 }
 
 float tank::get_body_x() const
@@ -129,7 +130,7 @@ float tank::get_turret_x() const
 
 float tank::get_turret_y() const
 {
-    return -tank_size_.body_y;
+    return -tank_size_.body_y - 5.0f;
 }
 
 float tank::get_turret_width() const
@@ -142,7 +143,7 @@ float tank::get_turret_height() const
     return turret_.height;
 }
 
-std::string tank::get_player_name()
+std::string tank::get_player_name() const
 {
     return player_info_.player_name;
 }
@@ -157,12 +158,18 @@ int tank::get_health() const
     return player_info_.health;
 }
 
+int tank::reduce_health_by(int amount)
+{
+    player_info_.health -= amount;
+    return player_info_.health;
+}
+
 int tank::get_ammo() const
 {
     return player_info_.ammo;
 }
 
-std::string tank::get_weapon_name()
+std::string tank::get_weapon_name() const
 {
     return player_info_.weapon;
 }
@@ -171,8 +178,30 @@ std::string tank::get_weapon_name()
 sf::Vector2f tank::get_turret_tip_position() const
 {
     // Calculate the position of the tip of the turret based on tank position and turret dimensions
-    const float tip_x = location_.x + tank_size_.body_x - turret_.height * std::cos(turret_.angle);
-    const float tip_y = location_.y + tank_size_.body_y - turret_.height * std::sin(turret_.angle);
+    const float tip_x = location_.x + get_body_x() - turret_.height * std::cos(turret_.angle);
+    const float tip_y = location_.y + get_body_y() - turret_.height * std::sin(turret_.angle);
 
     return {tip_x, tip_y};
+}
+
+sf::Texture tank::get_tank_texture()
+{
+    sf::Texture tank_texture;
+    if (!tank_texture.loadFromFile("Images/tank-army.png"))
+    {
+        KJ::debug_output::print(__FILE__, "failed to load image", KJ::debug_output::MessageType::FATAL);
+        // exit(1);
+    }
+    return tank_texture;
+}
+
+sf::Texture tank::get_turret_texture()
+{
+    sf::Texture turret_texture;
+    if (!turret_texture.loadFromFile("Images/turret-army.png"))
+    {
+        KJ::debug_output::print(__FILE__, "failed to load image");
+        // exit(1);
+    }
+    return turret_texture;
 }

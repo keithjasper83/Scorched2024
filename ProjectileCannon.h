@@ -1,6 +1,8 @@
 #pragma once
+
 #include "Config.h"
 #include "Tank.h"
+#include "debug_output.h"
 #include <cmath>
 #include <corecrt_math_defines.h>
 
@@ -38,6 +40,7 @@ class projectile
     float get_start_x() const;
     void set_start_y(float start_y);
     void set_start_x(float start_x);
+    int get_damage() const;
 
   private:
     // ...
@@ -45,4 +48,6 @@ class projectile
     // Add these two members
     float explosion_duration_;
     float explosion_timer_;
+
+    int damage = 110;
 };

@@ -1,46 +1,47 @@
 #include <functional>
 
-#include "Config.h"
 #include "background_particles.h"
 
 background_particles::background_particles()
 {
-}
+    if (!texture.loadFromFile("Images/snowflake.png"))
+    {
+        // Handle error
+        KJ::debug_output::print(__FILE__, "Failed to load texture!");
+    }
+    // sprite = sf::Sprite(texture);
+    animation = animated_sprite(texture, 5, 1.0f);
+};
 
 sf::Sprite background_particles::render()
 {
     particle_texture.clear(sf::Color::Transparent);
-    // Create a circle shape for the dust particle
-    sf::CircleShape dust_particle(5.0f);
-    dust_particle.setFillColor(sf::Color::Yellow);
-    // Move and draw dust particles
-    // std::cout << "new Frame rendering background particles" << std::endl;
+
     for (const auto &particle : particle_vector)
     {
-        // Set the position of the particle
-        dust_particle.setPosition(particle);
-        // std::cout << "rendering particle - x: " << particle.x << " y: " << particle.y << std::endl;
+        // sprite.setPosition(particle);
+        animation.set_position(particle);
+        animation.update(1); // Adjust the elapsed time as needed
 
-        // Draw the particle onto the render texture
-        particle_texture.draw(dust_particle);
+        // Draw the animated sprite onto the render texture
+        sf::Sprite animatedSprite = animation.draw();
+        particle_texture.draw(animatedSprite);
     }
 
-    // Display the render texture
     particle_texture.display();
-    sf::Sprite sprite(particle_texture.getTexture());
-    /*sprite.setOrigin(this->screen_width / 2.f, this->screen_height / 2.f);
-        sprite.setPosition(this->screen_width / 2.f, this->screen_height / 2.f);
-        sprite.setScale(1.0f, 1.0f);*/
-    // sprite.setColor(sf::Color(0, 255, 255, 255));
+    sf::Sprite sprite_window(particle_texture.getTexture());
+    // Draw the sprite_window using your window.draw method
+
+    // particle_texture.getTexture().copyToImage().saveToFile("Images/snowflake11.png");
     this->update();
-    return sprite;
+    return sprite_window;
 }
 
 void background_particles::set_screen_dimensions(const int width, const int height)
 {
     this->screen_width = width;
     this->screen_height = height;
-    particle_texture.create(this->screen_width, this->screen_height);
+    particle_texture.create(width, height);
     particle_texture.setSmooth(true);
     particle_texture.setRepeated(true);
     particle_texture.clear(sf::Color::Transparent);
@@ -60,8 +61,8 @@ void background_particles::update()
         const float old_position_y = particle.y;
 
         // Initialize a normal distribution for particle generation
-        std::normal_distribution<float> random_offset_x(0.0f, 0.5f); // Adjust the standard deviation as needed
-        std::normal_distribution<float> random_offset_y(1.0f, 0.5f);
+        std::normal_distribution<float> random_offset_x(0.0f, 0.25f); // Adjust the standard deviation as needed
+        std::normal_distribution<float> random_offset_y(0.5f, 0.75f);
 
         const float offset_x = random_offset_x(rand_number);
         const float offset_y = random_offset_y(rand_number);
@@ -86,24 +87,28 @@ void background_particles::create(const int quantity)
     // Initialize a normal distribution for particle generation
     std::normal_distribution<float> normal_x(this->screen_width / 2.0f, this->screen_width / 4.0f);
     std::normal_distribution<float> normal_y(this->screen_height / 10.0f, this->screen_height / 4.0f);
+    std::normal_distribution<float> normal_z(0.2f, 1.5f);
 
-    for (int i = 0; i < quantity; i++)
+    if (particle_vector.size() < constants::particle_count)
     {
-        // Generate random positions with a normal distribution
-        const sf::Vector2f particle_position(normal_x(rand_number), normal_y(rand_number));
+        for (int i = 0; i < quantity; i++)
+        {
+            // Generate random positions with a normal distribution
+            const sf::Vector3f particle_position(normal_x(rand_number), normal_y(rand_number), normal_z(rand_number));
 
-        particle_vector.push_back(particle_position);
+            particle_vector.push_back(particle_position);
+        }
     }
 }
 
 void background_particles::destroy()
 {
-    std::cout << "destroying background particles" << std::endl;
+    KJ::debug_output::print(__FILE__, "destroying background particles");
 }
 
 void background_particles::remove_out_of_bounds_particles()
 {
-    auto it = std::remove_if(particle_vector.begin(), particle_vector.end(), [this](const sf::Vector2f &particle) {
+    auto it = std::remove_if(particle_vector.begin(), particle_vector.end(), [this](const sf::Vector3f &particle) {
         // Assuming screen_width and screen_height are the dimensions of your screen
         return particle.x > this->screen_width || particle.y > this->screen_height;
     });

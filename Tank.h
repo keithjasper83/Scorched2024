@@ -1,7 +1,11 @@
 #pragma once
 #include "SFML/Graphics.hpp"
+#include "debug_output.h"
 #include <cmath>
+#include <iostream>
 #include <string>
+
+#include "Config.h"
 
 class tank
 {
@@ -23,8 +27,8 @@ class tank
     } player_info_;
     struct
     {
-        float body_x = 64.0f;
-        float body_y = 64.0f;
+        float body_x = 64.0f * constants::tank_scale;
+        float body_y = 64.0f * constants::tank_scale;
     } tank_size_;
     struct
     {
@@ -85,14 +89,17 @@ class tank
 
     float get_turret_height() const;
 
-    std::string get_player_name();
+    std::string get_player_name() const;
 
     int get_index() const;
 
     int get_health() const;
+    int reduce_health_by(int amount);
 
     int get_ammo() const;
 
-    std::string get_weapon_name();
+    std::string get_weapon_name() const;
     sf::Vector2f get_turret_tip_position() const;
+    static sf::Texture get_tank_texture();
+    static sf::Texture get_turret_texture();
 };

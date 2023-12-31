@@ -10,7 +10,7 @@ explosion::explosion(const float x, const float y, const float size, const sf::T
 
     // Customize the appearance of the explosion (you can set color, texture, etc.)
     explosion_shape_.setRadius(explosion_size_);
-    explosion_shape_.setFillColor(sf::Color::Blue);
+    explosion_shape_.setFillColor(sf::Color(180.0f, 60.0f, 240.0f, 255.0f));
     explosion_shape_.setOrigin(explosion_size_, explosion_size_); // Set the origin to the center
     explosion_shape_.setPosition(position_);
 }

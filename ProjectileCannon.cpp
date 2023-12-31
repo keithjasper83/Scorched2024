@@ -56,8 +56,9 @@ void projectile::update_position(const float time_elapsed, const float gravity)
 
 float projectile::get_initial_velocity()
 {
-    printf("Projectile.cpp - Player: %s getInitialVelocity: %f\n", player.get_player_name().c_str(),
-           player.get_power());
+    KJ::debug_output::print(
+        __FILE__, "Player: " + player.get_player_name() + " getInitialVelocity: " + std::to_string(player.get_power()),
+        KJ::debug_output::MessageType::GOOD);
     // exit(0);
     return player.get_power();
 }
@@ -132,4 +133,9 @@ void projectile::set_start_y(const float start_y)
 void projectile::set_start_x(const float start_x)
 {
     this->start_x = start_x;
+}
+
+int projectile::get_damage() const
+{
+    return this->damage;
 }

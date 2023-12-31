@@ -1,8 +1,4 @@
-#pragma once
-
-#include "SoundManager.h" //#
-
-// todo: implement simple function to call anywhere which will play buffers with a single line of code
+#include "SoundManager.h"
 
 /// <summary>
 /// <para>SoundManager Class</para>
@@ -33,7 +29,7 @@ sound_manager::sound_manager()
 /// <see cref="SoundManager"/>
 void sound_manager::fire()
 {
-    std::cout << "sound_manager::fire()" << std::endl;
+    KJ::debug_output::print(__FILE__, "sound_manager::fire()", KJ::debug_output::MessageType::GOOD);
     sound_fire_projectile_.play();
 }
 
@@ -51,8 +47,17 @@ void sound_manager::fire()
 /// <see cref="SoundManager"/>
 void sound_manager::explode()
 {
-    std::cout << "sound_manager::explode()" << std::endl;
+    KJ::debug_output::print(__FILE__, "sound_manager::explode()", KJ::debug_output::MessageType::GOOD);
     sound_explosion_.play();
+}
+
+void sound_manager::rotate()
+{
+    KJ::debug_output::print(__FILE__, "sound_manager::cogs()", KJ::debug_output::MessageType::INFO);
+    if (sound_cogs_.getStatus() != sf::Sound::Playing)
+    {
+        sound_cogs_.play();
+    }
 }
 
 /// <summary>
@@ -72,6 +77,7 @@ void sound_manager::load_sounds()
     sound_manager::load_sound("mixkit-blast-hit-with-echo-2186.wav", sound_buffer_explosion_, sound_explosion_);
     sound_manager::load_sound("9mm-pistol-shoot-short-reverb-7152.wav", sound_buffer_fire_projectile_,
                               sound_fire_projectile_);
+    sound_manager::load_sound("cogs.wav", sound_buffer_cogs_, sound_cogs_);
 }
 
 /// <summary>
@@ -85,15 +91,16 @@ void sound_manager::load_sound(std::string sound_name, sf::SoundBuffer &sound_bu
     {
         if (!sound_buffer.loadFromFile(Filename))
         {
-            std::cout << "ERROR File not found - " << Filename << std::endl;
+            KJ::debug_output::print(__FILE__, "File not found - " + Filename, KJ::debug_output::MessageType::FATAL);
         }
         else
         {
             sound.setBuffer(sound_buffer);
+            sound.setLoop(false);
         }
     }
     else
     {
-        std::cout << "ERROR: File does not exist: " << Filename << std::endl;
+        KJ::debug_output::print(__FILE__, " File does not exist: " + Filename, KJ::debug_output::MessageType::FATAL);
     }
 }
