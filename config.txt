@@ -1,0 +1,16 @@
+windowedResolutionY = 720
+engineDefaultStartPlayers = 2
+windowedResolutionX = 1280
+verboseDebugging = 1
+maxFPS = 60
+renderBackgroundParticleCount = 100
+defaultFullscreen = true
+renderFPS = true
+renderDebugGrid = false
+enginePhysicsEnabled = true
+renderParticlesEnabled = true
+renderDebugHitboxes = false
+renderDebugMenuForce = false
+gameWindowTitle = Scorched Earth
+engineFontFile = Roboto-Bold.ttf
+configLoaded = true

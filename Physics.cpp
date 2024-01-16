@@ -2,7 +2,7 @@
 
 physics::physics()
 {
-    this->gravity_ = constants::gravity;
+    this->gravity_ = ConfigJSON::getEngineGravity();
 }
 physics::physics(const float gravity) : gravity_(gravity)
 {
@@ -17,7 +17,7 @@ float physics::get_gravity() const
 
 void physics::apply_gravity(std::vector<tank> &tanks, terrain_generator &terrain)
 {
-    //todo: check the whole length of the tank, not just the center
+    // todo: check the whole length of the tank, not just the center
     for (tank &tank : tanks)
     {
         if (!tank.get_on_ground())

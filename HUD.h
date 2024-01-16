@@ -16,5 +16,5 @@ class hud
     sf::Text generate_player_data(tank tank) const;
     void render_player_data(sf::RenderWindow &window, const std::vector<tank> &players) const;
     static sf::RectangleShape create_centered_red_window();
-    sf::Text set_winner(std::string playerName);
+    sf::Text set_winner(std::string playerName) const;
 };

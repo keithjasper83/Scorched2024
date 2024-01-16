@@ -2,106 +2,151 @@
 
 renderer::renderer(const int screen_width, const int screen_height)
 {
-    KJ::debug_output::print(__FILE__, "Renderer Constructor", KJ::debug_output::MessageType::GOOD);
+    initializeRenderer(screen_width, screen_height);
+}
+
+void renderer::initializeRenderer(const int screen_width, const int screen_height)
+{
     try
     {
-        _window_manager.set_display_resolution(screen_width, screen_height);
-        _window_manager.set_canvas_resolution(screen_width * 2, screen_height * 2);
+        ConfigJSON::loadConfigText();
+        validateResolutions(screen_width, screen_height);
+        loadImageAssets();
+        loadFontAsset();
+        engineSetFrameLimits(window_);
+        create_window();
+        terrain_obj.set_screen_size(canvas_resolution.width, canvas_resolution.height);
+        frame_time_buffer.resize(100, 0.0f); // Resize the buffer to 100 elements
+        game_state.set_players(ConfigJSON::getEngineDefaultStartPlayers());
+        if (ConfigJSON::getDefaultFullScreen() == true)
+        {
+            toggle_full_screen(true);
+        }
     }
     catch (std::exception &e)
     {
-        KJ::debug_output::print(__FILE__, static_cast<std::string>(e.what()), KJ::debug_output::MessageType::FATAL);
+        KJ::debug_output::print(__FILE__, e.what(), KJ::debug_output::MessageType::FATAL);
     }
+}
+
+void renderer::validateResolutions(const int screen_width, const int screen_height)
+{
+    _window_manager.set_display_resolution(screen_width, screen_height);
+    _window_manager.set_canvas_resolution(screen_width * 2, screen_height * 2);
     canvas_resolution = _window_manager.get_canvas_resolution();
     display_resolution = _window_manager.get_display_resolution();
 
     if (canvas_resolution.height <= 1.0f || canvas_resolution.width <= 1.0f || display_resolution.height <= 1.0f ||
         display_resolution.width <= 1.0f)
     {
-        KJ::debug_output::print(__FILE__, "Error: resolutions not set", KJ::debug_output::MessageType::FATAL);
-        exit(1);
+        throw std::runtime_error("Error: invalid resolution");
     }
     KJ::debug_output::print(__FILE__, "Window Manager Initialized", KJ::debug_output::MessageType::INFO);
-
-    load_image_assets();
-    load_font_assets();
-    set_frame_limits();
-    create_window();
-    terrain_obj.set_screen_size(canvas_resolution.width, canvas_resolution.height);
-    frame_time_buffer.resize(100, 0.0f); // Resize the buffer to 100 elements
-    game_state.set_players(constants::default_starting_players);
-    background_particles particles;
-    if (constants::fullscreen == true)
-    {
-        toggle_full_screen(true);
-    }
 }
 
 void renderer::create_window()
 {
-    window.create(sf::VideoMode(display_resolution.width, display_resolution.height), window_title, sf::Style::Default,
-                  settings);
-    set_icon(window);
+    window_.create(sf::VideoMode(display_resolution.width, display_resolution.height), window_title, sf::Style::Default,
+                   settings);
+    setIcon(window_);
 }
 
-void renderer::set_icon(sf::RenderWindow &window)
+void renderer::setIcon(sf::RenderWindow &window)
 {
-    sf::Image image = sf::Image{};
-    if (!image.loadFromFile("Images/icon-master.png"))
+    if (iconImage_.getSize().x == 0 || iconImage_.getSize().y == 0)
     {
-        KJ::debug_output::print(__FILE__, "Failed to load icon", KJ::debug_output::MessageType::FATAL);
+        // Load icon image if it hasn't been loaded before
+        if (!loadIconImage())
+        {
+            // Failed to load icon, handle error or use a default icon
+            KJ::debug_output::print(__FILE__, "Failed to load icon", KJ::debug_output::MessageType::ERROR);
+            // Optionally, set a default icon or handle the error gracefully
+        }
     }
-    window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
+    window.setIcon(iconImage_.getSize().x, iconImage_.getSize().y, iconImage_.getPixelsPtr());
     KJ::debug_output::print(__FILE__, "Icon Set", KJ::debug_output::MessageType::GOOD);
 }
 
-void renderer::load_font_assets()
+bool renderer::loadIconImage()
 {
-    if (file_system::file_exists(constants::font_file))
+    if (!file_system::file_exists("Images/icon-master.png"))
     {
-        font.loadFromFile(constants::font_file); // Load a font for rendering text
+        // Optionally, provide a default icon or handle the absence of the icon file
+        return false;
+    }
+    if (!iconImage_.loadFromFile("Images/icon-master.png"))
+    {
+        // Failed to load icon image
+        return false;
+    }
+    return true;
+}
+
+void renderer::loadFontAsset()
+{
+    if (file_system::file_exists(ConfigJSON::getEngineFontFile()))
+    {
+        if (!font.loadFromFile(ConfigJSON::getEngineFontFile()))
+        {
+            KJ::debug_output::print(__FILE__, "ERROR: Failed to load font: " + ConfigJSON::getEngineFontFile(),
+                                    KJ::debug_output::MessageType::FATAL);
+            // Handle failure gracefully or use a default font
+        }
     }
     else
     {
-        KJ::debug_output::print(__FILE__, "ERROR: Failed to load font!\n", KJ::debug_output::MessageType::FATAL);
+        KJ::debug_output::print(__FILE__, "ERROR: Font file not found: " + ConfigJSON::getEngineFontFile(),
+                                KJ::debug_output::MessageType::FATAL);
+        // Handle absence of font file gracefully or use a default font
     }
 }
 
-void renderer::create_settings()
+void renderer::createSettings()
 {
-    settings.depthBits = 24;        // Depth buffer settings (adjust as needed)
-    settings.stencilBits = 8;       // Stencil buffer settings (adjust as needed)
-    settings.antialiasingLevel = 8; // Anti-aliasing level (adjust as needed)
-    settings.majorVersion = 3;      // Set the major OpenGL version
-    settings.minorVersion = 3;      // Set the minor OpenGL version
-    settings.sRgbCapable = true;    // Enable sRGB (gamma correction)
+    // Modify settings here based on requirements or user-defined parameters
+    settings.depthBits = 24;
+    settings.stencilBits = 8;
+    settings.antialiasingLevel = 8;
+    settings.majorVersion = 3;
+    settings.minorVersion = 3;
+    settings.sRgbCapable = true;
 }
 
-void renderer::load_image_assets()
+void renderer::loadImageAssets()
 {
-    load_background_image("Images/sky1.png");
-    load_terrain_image("Images/rock1.jpg");
+    loadImage("Images/sky1.png", background_texture);
+    loadImage("Images/rock1.jpg", terrain_texture);
 }
 
-void renderer::load_background_image(const std::string &image)
+void renderer::loadImage(const std::string &image, sf::Texture &texture)
 {
     if (file_system::file_exists(image))
     {
-        background_texture.loadFromFile(image);
-        KJ::debug_output::print(__FILE__, "Background image loaded to memory", KJ::debug_output::MessageType::INFO);
+        if (!texture.loadFromFile(image))
+        {
+            // Failed to load texture
+            KJ::debug_output::print(__FILE__, "Failed to load image: " + image, KJ::debug_output::MessageType::FATAL);
+        }
+        else
+        {
+            // Successfully loaded texture
+            KJ::debug_output::print(__FILE__, "Image loaded: " + image, KJ::debug_output::MessageType::INFO);
+        }
     }
     else
     {
-        KJ::debug_output::print(__FILE__, "Failed to load background image!", KJ::debug_output::MessageType::FATAL);
+        // File doesn't exist
+        KJ::debug_output::print(__FILE__, "Image file not found: " + image, KJ::debug_output::MessageType::FATAL);
     }
 }
 
-void renderer::set_background_image(const std::string &image)
+void renderer::renderBackground(sf::RenderWindow &renderWindow)
 {
+    // Assuming background_texture is already loaded
     sf::Sprite background_sprite(background_texture);
     background_sprite.setPosition(0, 0);
     background_sprite.setScale(terrain_obj.get_scale().x, terrain_obj.get_scale().y);
-    window.draw(background_sprite, render_state);
+    renderWindow.draw(background_sprite, render_state);
 }
 
 void renderer::load_terrain_image(const std::string &image)
@@ -116,48 +161,60 @@ void renderer::restart_game()
     terrain_generator generator(display_resolution.width, display_resolution.height);
     terrain_obj.reset_terrain();
     start();
-    create_players();
+    engineCreatePlayers();
+}
+
+void renderer::engineUpdate(sf::RenderWindow &renderWindow)
+{
+    delta_time = clock.restart();          // Restart the clock and save the elapsed time into deltaTime
+    engineHandleInputEvents(renderWindow); // Handle events
+
+    for (auto it = explosions.begin(); it != explosions.end();)
+    {
+        it->update(delta_time); // Update the explosion
+        if (!it->is_active())
+        {
+            it = explosions.erase(it); // Remove inactive explosions
+        }
+        else
+        {
+            ++it;
+        }
+    }
+    fpsFrameTimeSum -= frame_time_buffer[fpsCount];       // Subtract the oldest frame time from the sum
+    fpsFrameTimeSum += delta_time.asSeconds();            // Add the new frame time to the sum
+    frame_time_buffer[fpsCount] = delta_time.asSeconds(); // Store the new frame time in the buffer
+    fpsCount = (fpsCount + 1) % frame_time_buffer.size(); // Increment the frame index and wrap around
+    update_fps(fpsFrameTimeSum / static_cast<int>(frame_time_buffer.size())); // Pass the average frame time
+}
+
+void renderer::engineSetup(sf::RenderWindow &renderWindow)
+{
+
+    engineCreatePlayers(); // Create the players
+    engineSetFrameLimits(renderWindow);
+    particles.set_screen_dimensions(display_resolution.width, display_resolution.height);
+}
+
+void renderer::frameUpdate()
+{
 }
 
 void renderer::start()
 {
-    size_t frame_index = 0;      // Index of the current frame time
-    float frame_time_sum = 0.0f; // Sum of the frame times
-    create_players();            // Create the players
-    set_frame_limits();
-    particles.set_screen_dimensions(display_resolution.width, display_resolution.height);
+    ConfigJSON::loadConfigText();
 
-    while (window.isOpen())
+    engineSetup(window_);
+    while (window_.isOpen())
     {
-        delta_time = clock.restart(); // Restart the clock and save the elapsed time into deltaTime
-        if (!this->display_menu)
-        {
-            handle_events(); // Handle events
-        }
-        for (auto it = explosions.begin(); it != explosions.end();)
-        {
-            it->update(delta_time); // Update the explosion
-            if (!it->is_active())
-            {
-                it = explosions.erase(it); // Remove inactive explosions
-            }
-            else
-            {
-                ++it;
-            }
-        }
-        frame_time_sum -= frame_time_buffer[frame_index];           // Subtract the oldest frame time from the sum
-        frame_time_sum += delta_time.asSeconds();                   // Add the new frame time to the sum
-        frame_time_buffer[frame_index] = delta_time.asSeconds();    // Store the new frame time in the buffer
-        frame_index = (frame_index + 1) % frame_time_buffer.size(); // Increment the frame index and wrap around
-        update_fps(frame_time_sum / static_cast<int>(frame_time_buffer.size())); // Pass the average frame time
+        engineUpdate(window_);
         KJ::debug_output::print(__FILE__, "Starting Physics", KJ::debug_output::MessageType::INFO);
-        run_gravity_simulation(); // Run the gravity simulation
-        render();                 // Run the render function to send information to the window
+        physicsRun();    // Run the gravity simulation
+        render(window_); // Run the render function to send information to the window
     }
 }
 
-void renderer::run_gravity_simulation()
+void renderer::physicsRun()
 {
     if (this->enable_physics)
     {
@@ -165,20 +222,10 @@ void renderer::run_gravity_simulation()
     }
 }
 
-void renderer::set_frame_limits()
+void renderer::engineSetFrameLimits(sf::RenderWindow &renderWindow)
 {
-    window.setFramerateLimit(constants::frame_rate); // Limit the frame rate to 60 FPS
-    window.setVerticalSyncEnabled(false);            // Enable vertical sync
-}
-
-void renderer::set_fullscreen(bool fullscreen)
-{
-    this->fullscreen = fullscreen;
-}
-
-bool renderer::get_fullscreen() const
-{
-    return this->fullscreen;
+    renderWindow.setFramerateLimit(ConfigJSON::getMaxFPS()); // Limit the frame rate to 60 FPS
+    renderWindow.setVerticalSyncEnabled(false);              // Enable vertical sync
 }
 
 void renderer::toggle_full_screen(bool startFull)
@@ -205,30 +252,31 @@ void renderer::toggle_full_screen(bool startFull)
     }
     if (get_fullscreen())
     {
-        window.create(desktopMode, "Game Title", sf::Style::Fullscreen);
-        display_resolution.width = window.getSize().x;
-        display_resolution.height = window.getSize().y;
+        window_.create(desktopMode, "Game Title", sf::Style::Fullscreen);
+        display_resolution.width = window_.getSize().x;
+        display_resolution.height = window_.getSize().y;
         KJ::debug_output::print(__FILE__,
-                                "Window Object Resolution: " + std::to_string(window.getSize().x) + " x " +
-                                    std::to_string(window.getSize().y),
+                                "Window Object Resolution: " + std::to_string(window_.getSize().x) + " x " +
+                                    std::to_string(window_.getSize().y),
                                 KJ::debug_output::MessageType::GOOD);
     }
     else
     {
-        window.create(sf::VideoMode(constants::window_screen_width, constants::window_screen_height), "Game Title",
-                      sf::Style::Default);
-        display_resolution.width = window.getSize().x;
-        display_resolution.height = window.getSize().y;
+        window_.create(sf::VideoMode(ConfigJSON::getWindowedResolutionX(), ConfigJSON::getWindowedResolutionY()),
+                       "Game Title", sf::Style::Default);
+        display_resolution.width = window_.getSize().x;
+        display_resolution.height = window_.getSize().y;
         KJ::debug_output::print(__FILE__,
-                                "Window Object Resolution: " + std::to_string(window.getSize().x) + " x " +
-                                    std::to_string(window.getSize().y),
+                                "Window Object Resolution: " + std::to_string(window_.getSize().x) + " x " +
+                                    std::to_string(window_.getSize().y),
                                 KJ::debug_output::MessageType::GOOD);
     }
-    terrain_obj.set_screen_size(window.getSize().x, window.getSize().y);
-    particles.set_screen_dimensions(window.getSize().x, window.getSize().y);
-    set_icon(window);
+    terrain_obj.set_screen_size(window_.getSize().x, window_.getSize().y);
+
+    particles.set_screen_dimensions(window_.getSize().x, window_.getSize().y);
+    setIcon(window_);
     restart_game();
-    set_frame_limits();
+    engineSetFrameLimits(window_);
 }
 
 void renderer::rotatePlayerTurn()
@@ -247,60 +295,65 @@ void renderer::rotatePlayerTurn()
     }
 }
 
-void renderer::checkWinState()
+void renderer::renderWinScreen(sf::RenderWindow &renderWindow, std::string winMessage)
+{
+    sf::Text text = render_hud.set_winner(winMessage);
+    text.setPosition(renderWindow.getSize().x / 2.0f - text.getLocalBounds().width / 2.0f,
+                     renderWindow.getSize().y / 2.0f - text.getLocalBounds().height / 2.0f);
+    sf::RectangleShape modalMenu(sf::Vector2f(400, 200));
+    modalMenu.setFillColor(sf::Color::White);
+    modalMenu.setPosition(renderWindow.getSize().x / 2.0f - modalMenu.getSize().x / 2.0f,
+                          renderWindow.getSize().y / 2.0f - modalMenu.getSize().y / 2.0f);
+    MenuManager winStateButtons(renderWindow, font);
+
+    renderWindow.draw(modalMenu);
+    renderWindow.draw(text);
+    winStateButtons.renderWinStateButtons(std::bind(&renderer::restart_game, this),
+                                          std::bind(&renderer::engineQuitGame, this));
+}
+
+void renderer::checkWinState(sf::RenderWindow &renderWindow)
 {
     if (players[0].get_health() <= 0 || players[1].get_health() <= 0)
     {
         // this->display_menu = true;
         // this->display_settings_menu = false;
+        MenuModalWindow modalWindow(renderWindow, font);
+
         if (players[0].get_health() <= 0)
         {
-            sf::Text text = render_hud.set_winner(players[0].get_player_name());
-            text.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
-            sf::RectangleShape modalMenu(sf::Vector2f(400, 200));
-            modalMenu.setFillColor(sf::Color::White);
-            modalMenu.setPosition(window.getSize().x / 2.0f - 200, window.getSize().y / 2.0f - 100);
-            window.draw(modalMenu);
-            window.draw(text);
-            KJ::debug_output::print(__FILE__, "Player 2 Wins", KJ::debug_output::MessageType::GOOD);
+            renderWinScreen(renderWindow, "Player 2 Wins");
         }
         else
         {
-            sf::Text text = render_hud.set_winner(players[1].get_player_name());
-            text.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f);
-            sf::RectangleShape modalMenu(sf::Vector2f(400, 200));
-            modalMenu.setFillColor(sf::Color::White);
-            modalMenu.setPosition(window.getSize().x / 2.0f - 200, window.getSize().y / 2.0f - 100);
-            window.draw(modalMenu);
-            window.draw(text);
-            KJ::debug_output::print(__FILE__, "Player 1 Wins", KJ::debug_output::MessageType::GOOD);
+            renderWinScreen(renderWindow, "Player 1 Wins");
         }
     }
 }
 
-void renderer::handle_events()
+void renderer::engineHandleInputEvents(sf::RenderWindow &renderWindow)
 {
     // todo: create constants::audio enabled toggle
     players[currentPlayer].active_player = true;
 
     sf::Event event;
-    while (window.pollEvent(event))
+    while (renderWindow.pollEvent(event))
     {
         if (event.type == sf::Event::Resized)
         {
             printf("Window Resized\n");
-            _window_manager.set_canvas_resolution(window.getSize().x, window.getSize().y);
+            _window_manager.set_canvas_resolution(renderWindow.getSize().x, renderWindow.getSize().y);
             sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
             terrain_obj.set_screen_size(event.size.width, event.size.height);
-            window.setView(sf::View(visible_area));
+            renderWindow.setView(sf::View(visible_area));
         }
         if (event.type == sf::Event::Closed)
         {
-            window.close();
+            renderWindow.close();
         }
         else if (event.type == sf::Event::MouseMoved)
         {
-            mousePosition = sf::Mouse::getPosition(window);
+            mousePosition = sf::Mouse::getPosition(renderWindow);
         }
         else if (event.type == sf::Event::KeyPressed)
         {
@@ -339,16 +392,53 @@ void renderer::handle_events()
             case sf::Keyboard::Space:
                 if (projectiles.size() < 1)
                 {
-                    players[currentPlayer].fire();           // todo: is this needed? (possibly for player rotation?)
-                    fire_projectile(players[currentPlayer]); // Fire a projectile
+                    players[currentPlayer].fire(); // todo: is this needed? (possibly for player rotation?)
+                    // fire_projectile(players[currentPlayer]); // Fire a projectile
+                    //  Assuming 'selectedProjectileType' is the user's choice
+                    ProjectileType selectedProjectileType = ProjectileType::Default; // Change this based on user input
+
+                    // Create a projectile using the factory
+                    std::unique_ptr<ProjectileInterface> projectile =
+                        ProjectileFactory::createProjectile(selectedProjectileType, players[currentPlayer]);
                 }
 
                 break;
 
-            /*
-                DEBUG AND MENU CONTROLS
+                /*
+                    DEBUG AND MENU CONTROLS
 
-              */
+                  */
+            case sf::Keyboard::F2:
+                ConfigJSON::saveConfigText();
+                std::cout << "intConfigData size: " << ConfigJSON::intConfigData.size() << std::endl;
+                std::cout << "boolConfigData size: " << ConfigJSON::boolConfigData.size() << std::endl;
+                std::cout << "stringConfigData size: " << ConfigJSON::stringConfigData.size() << std::endl;
+                // exit(0);
+                break;
+            case sf::Keyboard::F3:
+                std::cout << "intConfigData size: " << ConfigJSON::intConfigData.size() << std::endl;
+                std::cout << "boolConfigData size: " << ConfigJSON::boolConfigData.size() << std::endl;
+                std::cout << "stringConfigData size: " << ConfigJSON::stringConfigData.size() << std::endl;
+                for (const auto &item : ConfigJSON::intConfigData)
+                {
+                    std::cout << item.first << " = " << item.second << std::endl;
+                }
+                for (const auto &item : ConfigJSON::boolConfigData)
+                {
+                    std::cout << item.first << " = " << item.second << std::endl;
+                }
+                for (const auto &item : ConfigJSON::stringConfigData)
+                {
+                    std::cout << item.first << " = " << item.second << std::endl;
+                }
+                break;
+            case sf::Keyboard::F4:
+                ConfigJSON::dumpMapsToConsole();
+                break;
+            case sf::Keyboard::F6:
+                ConfigJSON::loadConfigText();
+                break;
+
             case sf::Keyboard::Escape:
                 // todo: implement menu system on pause screen
                 this->display_settings_menu = false;
@@ -357,7 +447,7 @@ void renderer::handle_events()
 
             case sf::Keyboard::Q:
                 // todo: implement menu system on pause screen
-                window.close(); // Close the window
+                renderWindow.close(); // Close the window
                 break;
             case sf::Keyboard::F5:
                 toggle_full_screen(); // Toggle fullscreen
@@ -409,7 +499,7 @@ void renderer::handle_events()
         if ((is_dragging && event.type == sf::Event::MouseMoved) ||
             (sf::Event::MouseButtonPressed == true && event.mouseButton.button == sf::Mouse::Left))
         {
-            const sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
+            const sf::Vector2i mouse_pos = sf::Mouse::getPosition(renderWindow);
             const float scale_x = terrain_obj.get_terrain_sprite().getScale().x;
             const float scale_y = terrain_obj.get_terrain_sprite().getScale().y;
             const sf::Vector2f scaled_mouse_pos(mouse_pos.x / scale_x, mouse_pos.y / scale_y);
@@ -419,7 +509,7 @@ void renderer::handle_events()
         }
         if (sf::Event::MouseButtonPressed == true && event.mouseButton.button == sf::Mouse::Right)
         {
-            sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
+            sf::Vector2i mouse_pos = sf::Mouse::getPosition(renderWindow);
             const float scale_x = terrain_obj.get_terrain_sprite().getScale().x;
             const float scale_y = terrain_obj.get_terrain_sprite().getScale().y;
             sf::Vector2f scaled_mouse_pos(mouse_pos.x / scale_x, mouse_pos.y / scale_y);
@@ -430,13 +520,13 @@ void renderer::handle_events()
     }
 }
 
-void renderer::render_explosions()
+void renderer::renderExplosions(sf::RenderWindow &renderTarget)
 {
     for (const explosion &explosion : explosions)
     {
         if (explosion.is_active())
         {
-            explosion.render(window);
+            explosion.render(renderTarget);
         }
         else
         {
@@ -449,7 +539,7 @@ void renderer::render_explosions()
     }
 }
 
-sf::FloatRect renderer::render_tank_hitbox(tank &tank)
+sf::FloatRect renderer::collisonDetectionGenerateHitbox(sf::RenderWindow &renderWindow, tank &tank)
 {
     // Get the tank's position and dimensions
     float tankWidth = -tank.get_body_x() * 2;
@@ -461,33 +551,33 @@ sf::FloatRect renderer::render_tank_hitbox(tank &tank)
     sf::FloatRect hitbox_rect(tankX, tankY, tankWidth, tankHeight);
     sf::RectangleShape hitbox(sf::Vector2f(tankWidth, tankHeight));
 
-    if (hitbox_rect.contains(sf::Vector2f(static_cast<float>(sf::Mouse::getPosition(window).x),
-                                          static_cast<float>(sf::Mouse::getPosition(window).y))))
+    if (hitbox_rect.contains(sf::Vector2f(static_cast<float>(sf::Mouse::getPosition(renderWindow).x),
+                                          static_cast<float>(sf::Mouse::getPosition(renderWindow).y))))
     {
         KJ::debug_output::print(__FILE__, "Mouse is in hitbox", KJ::debug_output::MessageType::GOOD);
     }
 
-    if (constants::debug_hitboxes == true)
+    if (ConfigJSON::getRenderDebugHitboxes() == true)
     {
         hitbox.setPosition(tankX, tankY);
         hitbox.setFillColor(sf::Color::Transparent);
         hitbox.setOutlineColor(sf::Color::Red);
         hitbox.setOutlineThickness(2.0f);
         // Draw the hitbox
-        window.draw(hitbox);
+        renderWindow.draw(hitbox);
     }
     return hitbox_rect;
 }
 
-void renderer::debug_display_hitboxes()
+void renderer::renderDebugCollisionDetectionShowHitboxes(sf::RenderWindow &renderWindow)
 {
     for (auto &player : players)
     {
-        render_tank_hitbox(player);
+        collisonDetectionGenerateHitbox(renderWindow, player);
     }
 }
 
-void renderer::render_projectiles()
+void renderer::renderProjectiles(sf::RenderWindow &renderTarget)
 {
 
     const float gravity = physics.get_gravity(); // Get the gravity value
@@ -496,9 +586,9 @@ void renderer::render_projectiles()
     {
         if (projectile.is_active())
         {
-            const float time_elapsed = delta_time.asSeconds() * constants::projectile_speed;
+            const float time_elapsed = delta_time.asSeconds() * ConfigJSON::getEngineProjectileSpeed();
             projectile.update_position(time_elapsed, gravity);
-            if (projectile.get_y() < window.getSize().y - 10 && projectile.get_y() > 0 + 10)
+            if (projectile.get_y() < renderTarget.getSize().y - 10 && projectile.get_y() > 0 + 10)
             {
                 const float projectile_x = projectile.get_x() + (projectile.width / 2);
                 const float projectile_y = projectile.get_y() + (projectile.height / 2);
@@ -510,8 +600,8 @@ void renderer::render_projectiles()
                 projectile_path.append(
                     sf::Vertex(sf::Vector2f(projectile.get_x() + (projectile.get_width() / 2),
                                             projectile.get_y() + (projectile.get_height() / 2)),
-                               sf::Color::Red)); // add a vertex to the vertex array for the projectile path
-                window.draw(projectile_path);    // draw the projectile path
+                               sf::Color::Red));    // add a vertex to the vertex array for the projectile path
+                renderTarget.draw(projectile_path); // draw the projectile path
                 if (terrain_obj.transparent_at_pixel(projectile_x, projectile_y))
                 {
                     collide_with_terrain(projectile);
@@ -522,7 +612,7 @@ void renderer::render_projectiles()
                 projectile_shape.setPosition(projectile.get_x(), projectile.get_y());
                 projectile_shape.setOrigin(projectile.get_width() / 2, projectile.get_width() / 2);
                 projectile_shape.setFillColor(sf::Color::Cyan);
-                window.draw(projectile_shape);
+                renderTarget.draw(projectile_shape);
             }
             else
             {
@@ -537,7 +627,7 @@ void renderer::render_projectiles()
     }
 }
 
-void renderer::collide_with_tank(int player_index, projectile projectile)
+void renderer::collide_with_tank(int player_index, ProjectileInterface &projectile)
 {
     // players[player_index].get_health();
     KJ::debug_output::print(__FILE__, "Player: " + players[player_index].get_player_name() + " hit!",
@@ -550,7 +640,7 @@ void renderer::collide_with_tank(int player_index, projectile projectile)
     rotatePlayerTurn();
 }
 
-void renderer::detect_tank(projectile &projectile)
+void renderer::detect_tank(ProjectileInterface &projectile)
 {
     for (auto &player : players)
     {
@@ -561,8 +651,6 @@ void renderer::detect_tank(projectile &projectile)
         float tankY = player.get_y();
         float tankTop = tankY + tankHeight;
         float tankBottom = tankY - tankHeight;
-        float tankLeft = tankX;
-        float tankRight = tankX + tankWidth;
 
         // Create a rectangle shape for the hitbox
         sf::FloatRect hitbox_rect(tankX, tankY, tankWidth, tankHeight);
@@ -577,12 +665,6 @@ void renderer::detect_tank(projectile &projectile)
         // Extract projectile parameters
         float projectileX = projectile.get_x();
         float projectileY = projectile.get_y();
-        float projectileWidth = projectile.get_width();
-        float projectileHeight = projectile.get_height();
-        float projectileTop = projectileY - projectileHeight;
-        float projectileBottom = projectileY;
-        float projectileLeft = projectileX;
-        float projectileRight = projectileX + projectileWidth;
 
         if (!hitbox_rect.contains(sf::Vector2f(projectileX, projectileY)))
         {
@@ -604,7 +686,7 @@ void renderer::detect_tank(projectile &projectile)
     }
 }
 
-void renderer::collide_with_terrain(projectile &projectile)
+void renderer::collide_with_terrain(ProjectileInterface &projectile)
 {
     queue_render_explosion(projectile);
     sounds_obj.explode(); // Play sound (debug)
@@ -620,105 +702,114 @@ void renderer::update_fps(const float average_frame_time)
     fps_text.setString("FPS " + std::to_string(static_cast<int>(frame_rate)));
 }
 
-void renderer::render()
+void renderer::renderTerrain(sf::RenderWindow &renderWindow)
 {
-    window.clear(); // Clear the window
-    // todo: move console output to a debug function - based on flag? seperate class?
-    set_background_image("sky1.png");
-    window.draw(terrain_obj.get_terrain_sprite(), render_state);
+    terrain_obj.set_screen_size(window_.getSize().x, window_.getSize().y);
+
+    renderWindow.draw(terrain_obj.get_terrain_sprite(), render_state);
+}
+
+void renderer::renderPlayers(sf::RenderWindow &renderWindow)
+{
     for (const auto &player : players)
     {
-        generate_tank(player); // Call the function to render the tank
+        renderPlayer(renderWindow, player); // Call the function to render the tank
     }
+}
 
-    render_projectiles();
+void renderer::renderParticles(sf::RenderWindow &renderWindow)
+{
     if (this->enable_particles)
     {
-        window.draw(particles.render());
+        renderWindow.draw(particles.render());
     }
-
-    render_pixel_map_size();
-    debug_display_hitboxes();
-    render_explosions();                            // Render the explosions
-    render_hud.render_player_data(window, players); // Render the player data
-    render_fps();                                   // Render the FPS
-    render_grid_lines(100);                         // Render the grid the int specified sets the pixel size of the grid
-    display_menu_render();
-    checkWinState();
-    window.display(); // Display the window
 }
 
-void renderer::render_pixel_map_size()
+void renderer::renderPlayerHud(sf::RenderWindow &renderWindow)
 {
-    sf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::Black);
-    text.setString("MapSize: " + std::to_string(terrain_obj.get_pixel_map_size()));
-    text.setPosition(window.getSize().x / 2.0f, window.getSize().y - 100.0f);
-    window.draw(text);
+    render_hud.render_player_data(renderWindow, players); // Render the player data
 }
 
-void renderer::display_menu_render()
+void renderer::renderDebugData(sf::RenderWindow &renderWindow)
 {
-    ModalWindow modal(window, font);
+    renderDebugGrid(renderWindow); // Render the grid lines
+    renderDebugFPS(renderWindow);  // Render the FPS
+    renderDebugCollisionDetectionShowHitboxes(renderWindow);
+}
 
-    if (this->display_menu)
+void renderer::renderMenuScreens(sf::RenderWindow &renderWindow)
+{
+    renderPauseMenu(renderWindow);
+}
+
+void renderer::render(sf::RenderWindow &renderWindow)
+{
+    renderWindow.clear(); // Clear the window
+    // todo: move console output to a debug function - based on flag? seperate class?
+    renderBackground(renderWindow);
+    renderTerrain(renderWindow);
+    renderPlayers(renderWindow);
+    renderProjectiles(renderWindow);
+    renderParticles(renderWindow);
+    renderExplosions(renderWindow);
+    renderPlayerHud(renderWindow);
+    renderDebugData(renderWindow);
+    renderMenuScreens(renderWindow);
+    checkWinState(renderWindow);
+
+    renderWindow.display(); // Display the window
+}
+
+void renderer::renderPauseMenu(sf::RenderWindow &renderTarget)
+{
+    if (display_menu)
     {
-        // Create a button
-        Button sampleButton(font, "Click me!", sf::Vector2f(100.f, 100.f), sf::Vector2f(200.f, 50.f));
-        sampleButton.onClick([]() { std::cout << "Button clicked!" << std::endl; });
-
-        // Create a menu and add the button to it
-        Menu sampleMenu(window);
-        sampleMenu.addButton(std::move(sampleButton));
-
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-            {
-                window.close();
-            }
-            else if (event.type == sf::Event::KeyPressed)
-            {
-                if (event.key.code == sf::Keyboard::Escape)
-                {
-                    this->display_menu = false;
-                }
-                else if (event.key.code == sf::Keyboard::Q)
-                {
-                    modal.show("Are you sure you want to quit?");
-                    modal.render();
-                    KJ::debug_output::print(__FILE__, "Modal Q Pressed", KJ::debug_output::MessageType::ERROR);
-                }
-            }
-
-            modal.handleEvent(event);
-
-            sampleMenu.handleEvent(event);
-
-            if (!modal.isModalVisible())
-            {
-                if (modal.getResult())
-                {
-                    // User clicked "Quit"
-                    std::cout << "Quit game!" << std::endl;
-                    KJ::debug_output::print(__FILE__, "Modal Confirm", KJ::debug_output::MessageType::ERROR);
-
-                    window.close();
-                }
-                else
-                {
-                    // User has not yet responsed!
-                    KJ::debug_output::print(__FILE__, "Modal Cancel", KJ::debug_output::MessageType::ERROR);
-                    // User clicked "Cancel"
-                    std::cout << "Canceled quitting!" << std::endl;
-                    // Handle other actions if needed
-                }
-            }
-        }
+        MenuManager menuManager(renderTarget, font);
+        menuManager.renderPauseMenu([this]() { engineResumeGame(); }, [this]() { engineOpenSettingsMenu(); },
+                                    [this]() { engineQuitGame(); });
     }
+}
+
+void renderer::engineHandleMenuSelection(MenuOption selectedOption)
+{
+    switch (selectedOption)
+    {
+    case MenuOption::Resume:
+        // Perform action for Resume option (e.g., resume the game)
+        engineResumeGame();
+        break;
+    case MenuOption::Settings:
+        // Perform action for Settings option (e.g., open settings menu)
+        engineOpenSettingsMenu();
+        break;
+    case MenuOption::Quit:
+        // Perform action for Quit option (e.g., quit the game)
+        engineQuitGame();
+        break;
+    default:
+        // Do nothing for other cases
+        break;
+    }
+}
+
+void renderer::engineResumeGame()
+{
+    // Logic to resume the game
+    display_menu = false; // Hide the pause menu
+    // Additional actions to resume the game...
+}
+
+void renderer::engineOpenSettingsMenu()
+{
+    // Logic to open the settings menu
+    // Additional actions to display settings...
+}
+
+void renderer::engineQuitGame()
+{
+    // Logic to quit the game
+    // Additional actions to quit the game...
+    window_.close(); // Close the game window or exit the application
 }
 
 sf::Texture renderer::generate_tank_texture(const int tank_width, const int tank_height)
@@ -739,7 +830,6 @@ sf::Texture renderer::generate_tank_texture(const int tank_width, const int tank
 
 sf::Texture renderer::generate_turret_texture(const int turret_width, const int turret_height)
 {
-    // Generate a texture for the turret
     sf::Image turret_image;
     sf::Texture turret_texture;
     turret_image.create(turret_width, turret_height, sf::Color::Red);
@@ -754,12 +844,11 @@ sf::Texture renderer::generate_turret_texture(const int turret_width, const int 
     return turret_texture;
 }
 
-void renderer::create_players()
+void renderer::engineCreatePlayers()
 {
     players.clear();
     KJ::debug_output::print(__FILE__, "Creating Players: #" + std::to_string(game_state.get_players()),
                             KJ::debug_output::MessageType::INFO);
-
     int player_count = game_state.get_players();
     int first_location = 80;
     int last_location = 160;
@@ -773,7 +862,6 @@ void renderer::create_players()
     {
         play_start_location_delta = display_resolution.width / game_state.get_players();
     }
-
     const int player_start_angles = 180;
     for (int i = 0; i < player_count; ++i)
     {
@@ -792,11 +880,10 @@ void renderer::create_players()
     }
 }
 
-void renderer::render_grid_lines(int pixels)
+void renderer::renderDebugGrid(sf::RenderWindow &renderTarget, int pixels)
 {
     if (this->render_grid)
     {
-        // Draw vertical lines
         for (int x = 0; x < display_resolution.width; x += pixels)
         {
             sf::RectangleShape line(sf::Vector2f(1.0f, display_resolution.height));
@@ -807,12 +894,11 @@ void renderer::render_grid_lines(int pixels)
             line_text.setFillColor(sf::Color::White);
             line_text.setString(line_label);
             line_text.setPosition(x, 0.0f);
-            window.draw(line_text);
+            renderTarget.draw(line_text);
             line.setPosition(x, 0.0f);
             line.setFillColor(sf::Color::Yellow);
-            window.draw(line);
+            renderTarget.draw(line);
         }
-        // Draw horizontal lines
         for (int y = 0; y < display_resolution.height; y += pixels)
         {
             sf::RectangleShape line(sf::Vector2f(display_resolution.width, 1.0f));
@@ -823,15 +909,15 @@ void renderer::render_grid_lines(int pixels)
             line_text.setFillColor(sf::Color::White);
             line_text.setString(line_label);
             line_text.setPosition(0.0f, y);
-            window.draw(line_text);
+            renderTarget.draw(line_text);
             line.setPosition(0.0f, y);
             line.setFillColor(sf::Color::Yellow);
-            window.draw(line);
+            renderTarget.draw(line);
         }
     }
 }
 
-void renderer::render_fps()
+void renderer::renderDebugFPS(sf::RenderWindow &renderWindow)
 {
     if (this->show_fps)
     {
@@ -840,38 +926,29 @@ void renderer::render_fps()
         fps_text.setFillColor(sf::Color::Red);
         const float text_x = (display_resolution.width - fps_text.getGlobalBounds().width - 40.0f);
         fps_text.setPosition(text_x, 10.0f);
-        window.draw(fps_text);
+        renderWindow.draw(fps_text);
     }
 }
 
-void renderer::generate_tank(tank tank)
+void renderer::renderPlayer(sf::RenderWindow &renderWindow, tank tank)
 {
-    // Generate a tank
-    // sf::Texture tank_texture = generate_tank_texture(tank.get_body_x(), tank.get_body_y());
     sf::Sprite tank_sprite;
-    float tank_scale = constants::tank_scale;
+    float tank_scale = ConfigJSON::getRenderTankScale();
     tank_sprite.setScale(tank_scale, tank_scale);
     tank_sprite.setTexture(tank_texture);
     tank_sprite.setPosition(tank.get_x(), tank.get_y() - 5.0f);
     tank_sprite.setOrigin(tank.get_origin_x(), tank.get_origin_y());
-    //  Generate a turret
-    /* sf::Texture turret_texture =
-         generate_turret_texture(static_cast<int>(tank.get_turret_width()),
-       static_cast<int>(tank.get_turret_height()));*/
-
     sf::Sprite turret_sprite;
     turret_sprite.setTexture(turret_texture);
     turret_sprite.setOrigin(tank.get_turret_width() / 2 + 7.5f, 4.0f);
     turret_sprite.setPosition(tank.get_x(), tank.get_y() - (tank.get_body_y() * tank_scale) + 5.0f);
     turret_sprite.setRotation(tank.get_angle());
-    // todo: perhaps generate to a texture and then render the texture to the screen?
-    //  Draw both the tank and turret
-    window.draw(turret_sprite);
-    window.draw(tank_sprite);
+    renderWindow.draw(turret_sprite);
+    renderWindow.draw(tank_sprite);
     get_turret_projectile_origin(tank);
 }
 
-void renderer::queue_render_explosion(const projectile &projectile)
+void renderer::queue_render_explosion(const ProjectileInterface &projectile)
 {
     const sf::Time duration = sf::seconds(2.0f);
     const explosion explosion(projectile.get_x(), projectile.get_y(), 40.0f, duration);
@@ -884,33 +961,49 @@ sf::Vector2f renderer::get_turret_projectile_origin(tank &tank)
 {
 
     const sf::Vector2f tank_top_center(tank.get_x(), tank.get_y() - tank.get_body_y());
-    // debug function for projectile origin when spawned
-    /*sf::CircleShape circle(5.0f);
-    circle.setPosition(tank_top_center);
-    circle.setFillColor(sf::Color::Red);
-    window.draw(circle);*/
-    // Calculate the offset based on the turret's angle
     const float turret_angle_radians = -tank.get_angle() * (3.14159265f / 180.0f);
     const float turret_length = tank.get_turret_height();
     const sf::Vector2f turret_tip_offset(turret_length * std::sin(turret_angle_radians),
                                          turret_length * std::cos(turret_angle_radians));
 
-    // Calculate the position of the second point relative to the top center of the tank
     const sf::Vector2f turret_tip_position = tank_top_center + turret_tip_offset;
     return turret_tip_position;
 }
 
-void renderer::fire_projectile(tank tank)
+// TODO: PROJECTILES
+void renderer::engineFireProjectile(tank tank)
 {
-    // Fire a projectile
-    // Create a new projectile and add it to the vector
-    projectile cannon(tank);
-    cannon.set_explosion_duration(3.0f);
-    sounds_obj.fire(); // play sound (debug)
-    const float launch_angle =
-        tank.get_angle() - 90.0f; // Set your desired launch angle in degrees and correct 90 degrees
 
-    cannon.launch(get_turret_projectile_origin(tank).x, get_turret_projectile_origin(tank).y, launch_angle);
-    // Add the projectile to the container
-    projectiles.push_back(cannon);
+    sounds_obj.fire(); // play sound (debug)
+    const float launch_angle = tank.get_angle() - 90.0f;
+
+    newProjectile->launch(get_turret_projectile_origin(tank).x, get_turret_projectile_origin(tank).y, launch_angle);
+    projectiles.push_back(std::move(newProjectile));
+}
+
+// void renderer::fire_projectile(tank tank)
+//{
+//
+//     projectile cannon(tank);
+//     cannon.set_explosion_duration(3.0f);
+//     sounds_obj.fire(); // play sound (debug)
+//     const float launch_angle =
+//         tank.get_angle() - 90.0f; // Set your desired launch angle in degrees and correct 90 degrees
+//
+//     cannon.launch(get_turret_projectile_origin(tank).x, get_turret_projectile_origin(tank).y, launch_angle);
+//     projectiles.push_back(cannon);
+//
+// }
+
+///
+/// GETTERS AND SETTERS
+///
+void renderer::set_fullscreen(bool fullscreen)
+{
+    this->fullscreen = fullscreen;
+}
+
+bool renderer::get_fullscreen() const
+{
+    return this->fullscreen;
 }

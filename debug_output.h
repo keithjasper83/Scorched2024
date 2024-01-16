@@ -1,5 +1,5 @@
 #pragma once
-#include "Config.h"
+#include "ConfigJSON.h"
 #include <iostream>
 #include <string>
 
@@ -58,14 +58,14 @@ class debug_output
         }
         else if (type == MessageType::GOOD)
         {
-            if (constants::verbose == 1)
+            if (ConfigJSON::getVerboseDebugging() == 1)
             {
                 print_to_console(filename + " : " + output, ConsoleColor::GREEN);
             }
         }
         else if (type == MessageType::INFO)
         {
-            if (constants::verbose > 1)
+            if (ConfigJSON::getVerboseDebugging() > 1)
             {
                 print_to_console("V-Verbose - " + filename + " : " + output, ConsoleColor::WHITE);
             }

@@ -107,6 +107,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,13 +134,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="backgroud_particles.cpp" />
+    <ClCompile Include="ConfigJSON.cpp" />
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="game_state_controller.cpp" />
     <ClCompile Include="HUD.cpp" />
-    <ClCompile Include="menu_screens.cpp" />
+    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="MenuButton.cpp" />
+    <ClCompile Include="MenuManager.cpp" />
+    <ClCompile Include="MenuModalWindow.cpp" />
     <ClCompile Include="Physics.cpp" />
-    <ClCompile Include="ProjectileCannon.cpp" />
+    <ClCompile Include="0ProjectileDefaults.cpp" />
+    <ClCompile Include="ProjectileFactory.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scorched.cpp" />
     <ClCompile Include="SoundManager.cpp" />
@@ -161,13 +167,19 @@
     <ClInclude Include="animated_sprite.h" />
     <ClInclude Include="background_particles.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="ConfigJSON.h" />
     <ClInclude Include="debug_output.h" />
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="game_state_controller.h" />
+    <ClInclude Include="MenuModalWindow.h" />
     <ClInclude Include="HUD.h" />
+    <ClInclude Include="Menu.h" />
+    <ClInclude Include="MenuButton.h" />
+    <ClInclude Include="MenuManager.h" />
     <ClInclude Include="Physics.h" />
-    <ClInclude Include="ProjectileCannon.h" />
+    <ClInclude Include="0ProjectileDefaults.h" />
+    <ClInclude Include="ProjectileFactory.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scorched.h" />
     <ClInclude Include="SoundManager.h" />

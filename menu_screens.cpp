@@ -71,8 +71,10 @@ class Button
 class Menu
 {
   public:
+    Menu() = default;
     Menu(sf::RenderWindow &window) : window_(window)
     {
+        // Other initialization logic
     }
 
     void addButton(Button button)

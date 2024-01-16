@@ -17,6 +17,7 @@
 // todo: find unused functions and remove them
 game::game(const int screen_width, const int screen_height) : renderer_(screen_width, screen_height)
 {
+
     // Initialize your game objects, terrain data, etc.
     this->screen_width_ = screen_width;
     this->screen_height_ = screen_height;
@@ -41,7 +42,12 @@ void game::render()
 
 int main()
 {
-    game game(constants::window_screen_width, constants::window_screen_height);
+    // TODO - add a splash screen
+    // TODO - add a loading screen
+    ConfigJSON config = ConfigJSON();
+    ConfigJSON::loadConfigText();
+    ConfigJSON::dumpMapsToConsole();
+    game game(ConfigJSON::getWindowedResolutionX(), ConfigJSON::getWindowedResolutionY());
     game.run();
 
     return 0;

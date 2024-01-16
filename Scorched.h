@@ -1,4 +1,5 @@
 #pragma once
+#include "ConfigJSON.h"
 #include "Renderer.h"
 #include "debug_output.h"
 

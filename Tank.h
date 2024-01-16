@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include "Config.h"
+#include "ConfigJSON.h"
 
 class tank
 {
@@ -27,8 +27,8 @@ class tank
     } player_info_;
     struct
     {
-        float body_x = 64.0f * constants::tank_scale;
-        float body_y = 64.0f * constants::tank_scale;
+        float body_x = 64.0f * ConfigJSON::getRenderTankScale();
+        float body_y = 64.0f * ConfigJSON::getRenderTankScale();
     } tank_size_;
     struct
     {

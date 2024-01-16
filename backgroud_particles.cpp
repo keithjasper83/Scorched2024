@@ -45,7 +45,7 @@ void background_particles::set_screen_dimensions(const int width, const int heig
     particle_texture.setSmooth(true);
     particle_texture.setRepeated(true);
     particle_texture.clear(sf::Color::Transparent);
-    this->create(constants::particle_count);
+    this->create(ConfigJSON::getRenderBackgroundParticleCount());
 }
 
 void background_particles::update()
@@ -87,9 +87,9 @@ void background_particles::create(const int quantity)
     // Initialize a normal distribution for particle generation
     std::normal_distribution<float> normal_x(this->screen_width / 2.0f, this->screen_width / 4.0f);
     std::normal_distribution<float> normal_y(this->screen_height / 10.0f, this->screen_height / 4.0f);
-    std::normal_distribution<float> normal_z(0.2f, 1.5f);
-
-    if (particle_vector.size() < constants::particle_count)
+    std::normal_distribution<float> normal_z(0.01f, 0.5f);
+    int count = ConfigJSON::getRenderBackgroundParticleCount();
+    if (particle_vector.size() < count)
     {
         for (int i = 0; i < quantity; i++)
         {
@@ -116,7 +116,7 @@ void background_particles::remove_out_of_bounds_particles()
     particle_vector.erase(it, particle_vector.end());
 
     // Add a new particle if needed
-    if (particle_vector.size() < constants::particle_count)
+    if (particle_vector.size() < ConfigJSON::getRenderBackgroundParticleCount())
     {
         create(1);
     }

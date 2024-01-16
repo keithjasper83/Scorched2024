@@ -1,5 +1,5 @@
 #pragma once
-#include "Config.h"
+#include "ConfigJSON.h"
 #include "animated_sprite.h"
 #include "window_manager.h"
 #include <SFML/Graphics.hpp>
@@ -23,7 +23,7 @@ class background_particles
     sf::Sprite render();
     void set_screen_dimensions(const int width, const int height);
     void update();
-    void create(const int quantity = 100);
+    void create(const int quantity);
     void destroy();
     void remove_out_of_bounds_particles();
 };

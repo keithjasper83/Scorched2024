@@ -2,7 +2,7 @@
 
 hud::hud()
 {
-    if (!font_.loadFromFile(constants::font_file))
+    if (!font_.loadFromFile(ConfigJSON::getEngineFontFile()))
     {
         KJ::debug_output::print(__FILE__, " Font not found", KJ::debug_output::MessageType::FATAL);
     }
@@ -78,12 +78,12 @@ sf::RectangleShape hud::create_centered_red_window()
     return red_window;
 }
 
-sf::Text hud::set_winner(std::string playerName)
+sf::Text hud::set_winner(std::string winMessage) const
 {
     sf::Text winner;
     winner.setFont(font_);
     winner.setCharacterSize(24);
     winner.setFillColor(sf::Color::Red);
-    winner.setString(playerName + " wins!");
+    winner.setString(winMessage);
     return winner;
 }
