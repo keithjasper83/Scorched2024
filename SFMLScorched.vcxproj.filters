@@ -173,6 +173,9 @@
     <ClInclude Include="ProjectileFactory.h">
       <Filter>Header Files\Projectiles</Filter>
     </ClInclude>
+    <ClInclude Include="ProjectileInterface.h">
+      <Filter>Header Files\Projectiles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Roboto-Bold.ttf">

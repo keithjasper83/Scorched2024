@@ -124,12 +124,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -180,6 +183,7 @@
     <ClInclude Include="Physics.h" />
     <ClInclude Include="0ProjectileDefaults.h" />
     <ClInclude Include="ProjectileFactory.h" />
+    <ClInclude Include="ProjectileInterface.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scorched.h" />
     <ClInclude Include="SoundManager.h" />

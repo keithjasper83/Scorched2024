@@ -194,6 +194,7 @@ void renderer::engineSetup(sf::RenderWindow &renderWindow)
     engineCreatePlayers(); // Create the players
     engineSetFrameLimits(renderWindow);
     particles.set_screen_dimensions(display_resolution.width, display_resolution.height);
+    engineLoadProjectiles();
 }
 
 void renderer::frameUpdate()
@@ -331,6 +332,222 @@ void renderer::checkWinState(sf::RenderWindow &renderWindow)
     }
 }
 
+void renderer::engineHandleWindowResize(sf::RenderWindow &renderWindow, sf::Event &event)
+{
+    printf("Window Resized\n");
+    _window_manager.set_canvas_resolution(renderWindow.getSize().x, renderWindow.getSize().y);
+    sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
+    terrain_obj.set_screen_size(event.size.width, event.size.height);
+    renderWindow.setView(sf::View(visible_area));
+}
+
+void renderer::engineHandleWindowClose(sf::RenderWindow &renderWindow)
+{
+    renderWindow.close();
+}
+
+void renderer::engineHandleMouseMove(sf::RenderWindow &renderWindow, sf::Vector2i &mousePosition)
+{
+    mousePosition = sf::Mouse::getPosition(renderWindow);
+}
+
+void renderer::engineHandleUserInputFire(sf::RenderWindow &renderWindow)
+{
+    if (projectiles.size() < 1)
+    {
+        players[currentPlayer].fire();
+
+        // Assuming 'selectedProjectileType' is the user's choice
+        ProjectileType selectedProjectileType = ProjectileType::DefaultProjectile; // Change this based on user input
+
+        // Create a projectile using the factory
+        std::unique_ptr<ProjectileInterface> projectile = ProjectileFactory::CreateProjectile(
+            ProjectileFactory::projectileTypeToString(selectedProjectileType), players[currentPlayer]);
+
+        sounds_obj.fire(); // play sound (debug)
+
+        if (projectile)
+        {
+            const float launch_angle = players[currentPlayer].get_angle() - 90.0f;
+            try
+            {
+                // Use a temporary variable to store the origin, avoiding duplicate function calls
+                sf::Vector2f origin = get_turret_projectile_origin(players[currentPlayer]);
+                projectile->launch(origin.x, origin.y, launch_angle, players[currentPlayer].get_power());
+
+                projectile->set_active(true);
+                std::cout << "Start Coordinates: " << projectile->get_start_x() << ", " << projectile->get_start_y()
+                          << std::endl;
+                KJ::debug_output::print(__FILE__, "Projectile launched", KJ::debug_output::MessageType::GOOD);
+            }
+            catch (const std::exception &e)
+            {
+                KJ::debug_output::print(__FILE__, e.what(), KJ::debug_output::MessageType::FATAL);
+                return; // Exit the function if launching fails
+            }
+
+            projectiles.emplace_back(std::move(projectile));
+        }
+        else
+        {
+            // Handle the case where projectile creation fails
+            KJ::debug_output::print(__FILE__, "Failed to create projectile", KJ::debug_output::MessageType::ERROR);
+        }
+    }
+}
+void renderer::engineHandleUserInputRotateLeft(sf::RenderWindow &renderWindow)
+{
+    if (projectiles.size() >= 1)
+    {
+        return;
+    }
+    sounds_obj.rotate();
+    players[currentPlayer].dec_angle(); // Decrease the angle of the player's turret
+};
+void renderer::engineHandleUserInputRotateRight(sf::RenderWindow &renderWindow)
+{
+    if (projectiles.size() >= 1)
+    {
+        return;
+    }
+    sounds_obj.rotate();
+    players[currentPlayer].inc_angle(); // Increase the angle of the player's turret
+};
+void renderer::engineHandleUserInputPowerUp(sf::RenderWindow &renderWindow)
+{
+    if (projectiles.size() >= 1)
+    {
+        return;
+    }
+    players[currentPlayer].inc_power(); // Increase the power of the player's turret
+};
+void renderer::engineHandleUserInputPowerDown(sf::RenderWindow &renderWindow)
+{
+    if (projectiles.size() >= 1)
+    {
+        return;
+    }
+    players[currentPlayer].dec_power(); // Decrease the power of the player's turret
+};
+
+void renderer::engineHandleUserInputSettingsSave(sf::RenderWindow &renderWindow)
+{
+    ConfigJSON::saveConfigText();
+    std::cout << "intConfigData size: " << ConfigJSON::intConfigData.size() << std::endl;
+    std::cout << "boolConfigData size: " << ConfigJSON::boolConfigData.size() << std::endl;
+    std::cout << "stringConfigData size: " << ConfigJSON::stringConfigData.size() << std::endl;
+    // exit(0);
+}
+
+void renderer::engineHandleUserInputConfigToConsole(sf::RenderWindow &renderWindow)
+{
+    std::cout << "intConfigData size: " << ConfigJSON::intConfigData.size() << std::endl;
+    std::cout << "boolConfigData size: " << ConfigJSON::boolConfigData.size() << std::endl;
+    std::cout << "stringConfigData size: " << ConfigJSON::stringConfigData.size() << std::endl;
+    for (const auto &item : ConfigJSON::intConfigData)
+    {
+        std::cout << item.first << " = " << item.second << std::endl;
+    }
+    for (const auto &item : ConfigJSON::boolConfigData)
+    {
+        std::cout << item.first << " = " << item.second << std::endl;
+    }
+    for (const auto &item : ConfigJSON::stringConfigData)
+    {
+        std::cout << item.first << " = " << item.second << std::endl;
+    }
+    ConfigJSON::dumpMapsToConsole();
+}
+
+void renderer::engineHandleUserInputSettingsLoad(sf::RenderWindow &renderWindow)
+{
+    ConfigJSON::loadConfigText();
+    std::cout << "intConfigData size: " << ConfigJSON::intConfigData.size() << std::endl;
+    std::cout << "boolConfigData size: " << ConfigJSON::boolConfigData.size() << std::endl;
+    std::cout << "stringConfigData size: " << ConfigJSON::stringConfigData.size() << std::endl;
+    // exit(0);
+}
+
+void renderer::engineHandleUserInput(sf::RenderWindow &renderWindow, sf::Event &event)
+{
+    switch (event.key.code)
+    {
+    case sf::Keyboard::Left:
+        engineHandleUserInputRotateLeft(renderWindow);
+        break;
+    case sf::Keyboard::Right:
+        engineHandleUserInputRotateRight(renderWindow);
+        break;
+    case sf::Keyboard::Up:
+        engineHandleUserInputPowerUp(renderWindow);
+        break;
+    case sf::Keyboard::Down:
+        engineHandleUserInputPowerDown(renderWindow);
+        break;
+    case sf::Keyboard::Space:
+        engineHandleUserInputFire(renderWindow);
+        break;
+
+        /*
+            DEBUG AND MENU CONTROLS
+
+          */
+    case sf::Keyboard::F2:
+        engineHandleUserInputSettingsSave(renderWindow);
+        break;
+    case sf::Keyboard::F3:
+        engineHandleUserInputConfigToConsole(renderWindow);
+        break;
+    case sf::Keyboard::F6:
+        engineHandleUserInputSettingsLoad(renderWindow);
+        break;
+
+    case sf::Keyboard::Escape:
+        // todo: implement menu system on pause screen
+        this->display_settings_menu = false;
+        this->display_menu = !this->display_menu;
+        break;
+
+    case sf::Keyboard::Q:
+        // todo: implement menu system on pause screen
+        renderWindow.close(); // Close the window
+        break;
+    case sf::Keyboard::F5:
+        toggle_full_screen(); // Toggle fullscreen
+        break;
+    case sf::Keyboard::P:
+        KJ::debug_output::print(__FILE__, "Firing Sound");
+        sounds_obj.fire(); // play sound (debug)
+        break;
+    case sf::Keyboard::F1:
+        restart_game(); // Restart the game
+        break;
+    case sf::Keyboard::G:
+        // Enables or disables the grid used for debugging and pixel placement
+        this->render_grid = !this->render_grid;
+        break;
+    case sf::Keyboard::F:
+        // Toggle the frame rate display
+        this->show_fps = !this->show_fps;
+        break;
+    case sf::Keyboard::O:
+        // Toggle the physics simulation (should stop tanks from falling to the terrain)
+        this->enable_physics = !this->enable_physics;
+        break;
+    case sf::Keyboard::I:
+        this->enable_particles = !this->enable_particles;
+        break;
+    case sf::Keyboard::M:
+        // KJ::debug_output::print(terrain_obj.get_pixel_map_size().to_string());
+        break;
+    case sf::Keyboard::N:
+        terrain_obj.update_pixel_array(terrain_obj.get_scale().x, terrain_obj.get_scale().y);
+        break;
+    default:
+        break;
+    }
+}
+
 void renderer::engineHandleInputEvents(sf::RenderWindow &renderWindow)
 {
     // todo: create constants::audio enabled toggle
@@ -341,148 +558,19 @@ void renderer::engineHandleInputEvents(sf::RenderWindow &renderWindow)
     {
         if (event.type == sf::Event::Resized)
         {
-            printf("Window Resized\n");
-            _window_manager.set_canvas_resolution(renderWindow.getSize().x, renderWindow.getSize().y);
-            sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
-            terrain_obj.set_screen_size(event.size.width, event.size.height);
-            renderWindow.setView(sf::View(visible_area));
+            engineHandleWindowResize(renderWindow, event);
         }
         if (event.type == sf::Event::Closed)
         {
-            renderWindow.close();
+            engineHandleWindowClose(renderWindow);
         }
         else if (event.type == sf::Event::MouseMoved)
         {
-            mousePosition = sf::Mouse::getPosition(renderWindow);
+            engineHandleMouseMove(renderWindow, mousePosition);
         }
         else if (event.type == sf::Event::KeyPressed)
         {
-            switch (event.key.code)
-            {
-            case sf::Keyboard::Left:
-                if (projectiles.size() >= 1)
-                {
-                    break;
-                }
-                sounds_obj.rotate();
-                players[currentPlayer].dec_angle(); // Decrease the angle of the player's turret
-                break;
-            case sf::Keyboard::Right:
-                if (projectiles.size() >= 1)
-                {
-                    break;
-                }
-                sounds_obj.rotate();
-                players[currentPlayer].inc_angle(); // Increase the angle of the player's turret
-                break;
-            case sf::Keyboard::Up:
-                if (projectiles.size() >= 1)
-                {
-                    break;
-                }
-                players[currentPlayer].inc_power(); // Increase the power of the player's turret
-                break;
-            case sf::Keyboard::Down:
-                if (projectiles.size() >= 1)
-                {
-                    break;
-                }
-                players[currentPlayer].dec_power(); // Decrease the power of the player's turret
-                break;
-            case sf::Keyboard::Space:
-                if (projectiles.size() < 1)
-                {
-                    players[currentPlayer].fire(); // todo: is this needed? (possibly for player rotation?)
-                    // fire_projectile(players[currentPlayer]); // Fire a projectile
-                    //  Assuming 'selectedProjectileType' is the user's choice
-                    ProjectileType selectedProjectileType = ProjectileType::Default; // Change this based on user input
-
-                    // Create a projectile using the factory
-                    std::unique_ptr<ProjectileInterface> projectile =
-                        ProjectileFactory::createProjectile(selectedProjectileType, players[currentPlayer]);
-                }
-
-                break;
-
-                /*
-                    DEBUG AND MENU CONTROLS
-
-                  */
-            case sf::Keyboard::F2:
-                ConfigJSON::saveConfigText();
-                std::cout << "intConfigData size: " << ConfigJSON::intConfigData.size() << std::endl;
-                std::cout << "boolConfigData size: " << ConfigJSON::boolConfigData.size() << std::endl;
-                std::cout << "stringConfigData size: " << ConfigJSON::stringConfigData.size() << std::endl;
-                // exit(0);
-                break;
-            case sf::Keyboard::F3:
-                std::cout << "intConfigData size: " << ConfigJSON::intConfigData.size() << std::endl;
-                std::cout << "boolConfigData size: " << ConfigJSON::boolConfigData.size() << std::endl;
-                std::cout << "stringConfigData size: " << ConfigJSON::stringConfigData.size() << std::endl;
-                for (const auto &item : ConfigJSON::intConfigData)
-                {
-                    std::cout << item.first << " = " << item.second << std::endl;
-                }
-                for (const auto &item : ConfigJSON::boolConfigData)
-                {
-                    std::cout << item.first << " = " << item.second << std::endl;
-                }
-                for (const auto &item : ConfigJSON::stringConfigData)
-                {
-                    std::cout << item.first << " = " << item.second << std::endl;
-                }
-                break;
-            case sf::Keyboard::F4:
-                ConfigJSON::dumpMapsToConsole();
-                break;
-            case sf::Keyboard::F6:
-                ConfigJSON::loadConfigText();
-                break;
-
-            case sf::Keyboard::Escape:
-                // todo: implement menu system on pause screen
-                this->display_settings_menu = false;
-                this->display_menu = !this->display_menu;
-                break;
-
-            case sf::Keyboard::Q:
-                // todo: implement menu system on pause screen
-                renderWindow.close(); // Close the window
-                break;
-            case sf::Keyboard::F5:
-                toggle_full_screen(); // Toggle fullscreen
-                break;
-            case sf::Keyboard::P:
-                KJ::debug_output::print(__FILE__, "Firing Sound");
-                sounds_obj.fire(); // play sound (debug)
-                break;
-            case sf::Keyboard::F1:
-                restart_game(); // Restart the game
-                break;
-            case sf::Keyboard::G:
-                // Enables or disables the grid used for debugging and pixel placement
-                this->render_grid = !this->render_grid;
-                break;
-            case sf::Keyboard::F:
-                // Toggle the frame rate display
-                this->show_fps = !this->show_fps;
-                break;
-            case sf::Keyboard::O:
-                // Toggle the physics simulation (should stop tanks from falling to the terrain)
-                this->enable_physics = !this->enable_physics;
-                break;
-            case sf::Keyboard::I:
-                this->enable_particles = !this->enable_particles;
-                break;
-            case sf::Keyboard::M:
-                // KJ::debug_output::print(terrain_obj.get_pixel_map_size().to_string());
-                break;
-            case sf::Keyboard::N:
-                terrain_obj.update_pixel_array(terrain_obj.get_scale().x, terrain_obj.get_scale().y);
-                break;
-            default:
-                break;
-            }
+            engineHandleUserInput(renderWindow, event);
         }
 
         // mouse events
@@ -495,6 +583,14 @@ void renderer::engineHandleInputEvents(sf::RenderWindow &renderWindow)
         if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
         {
             is_dragging = false;
+        }
+        if (event.type == sf::Event::MouseMoved)
+        {
+            if (ConfigJSON::getVerboseMouseDebugging() == true)
+            {
+                sf::Vector2i mouse_pos = sf::Mouse::getPosition(renderWindow);
+                std::cout << "Mouse Position: " << mouse_pos.x << ", " << mouse_pos.y << std::endl;
+            }
         }
         if ((is_dragging && event.type == sf::Event::MouseMoved) ||
             (sf::Event::MouseButtonPressed == true && event.mouseButton.button == sf::Mouse::Left))
@@ -509,6 +605,9 @@ void renderer::engineHandleInputEvents(sf::RenderWindow &renderWindow)
         }
         if (sf::Event::MouseButtonPressed == true && event.mouseButton.button == sf::Mouse::Right)
         {
+
+            KJ::debug_output::print(__FILE__, "Mouse Right Clicked", KJ::debug_output::MessageType::GOOD);
+
             sf::Vector2i mouse_pos = sf::Mouse::getPosition(renderWindow);
             const float scale_x = terrain_obj.get_terrain_sprite().getScale().x;
             const float scale_y = terrain_obj.get_terrain_sprite().getScale().y;
@@ -579,50 +678,43 @@ void renderer::renderDebugCollisionDetectionShowHitboxes(sf::RenderWindow &rende
 
 void renderer::renderProjectiles(sf::RenderWindow &renderTarget)
 {
-
     const float gravity = physics.get_gravity(); // Get the gravity value
 
-    for (auto &projectile : projectiles)
+    for (auto it = projectiles.begin(); it != projectiles.end();)
     {
+        auto &projectile = *it->get(); // Dereference the smart pointer
+
         if (projectile.is_active())
         {
+            KJ::debug_output::print(__FILE__, "Rendering projectile", KJ::debug_output::MessageType::GOOD);
             const float time_elapsed = delta_time.asSeconds() * ConfigJSON::getEngineProjectileSpeed();
             projectile.update_position(time_elapsed, gravity);
-            if (projectile.get_y() < renderTarget.getSize().y - 10 && projectile.get_y() > 0 + 10)
-            {
-                const float projectile_x = projectile.get_x() + (projectile.width / 2);
-                const float projectile_y = projectile.get_y() + (projectile.height / 2);
-                if (projectile.get_start_x() == 0.0f && projectile.get_start_y() == 0.0f)
-                {
-                    projectile.set_start_x(projectile_x);
-                    projectile.set_start_y(projectile_y);
-                }
-                projectile_path.append(
-                    sf::Vertex(sf::Vector2f(projectile.get_x() + (projectile.get_width() / 2),
-                                            projectile.get_y() + (projectile.get_height() / 2)),
-                               sf::Color::Red));    // add a vertex to the vertex array for the projectile path
-                renderTarget.draw(projectile_path); // draw the projectile path
-                if (terrain_obj.transparent_at_pixel(projectile_x, projectile_y))
-                {
-                    collide_with_terrain(projectile);
-                }
-                detect_tank(projectile);
+            std::cout << "Projectile Coordinates: " << projectile.get_x() << ", " << projectile.get_y() << std::endl;
 
-                sf::CircleShape projectile_shape(projectile.get_width());
-                projectile_shape.setPosition(projectile.get_x(), projectile.get_y());
-                projectile_shape.setOrigin(projectile.get_width() / 2, projectile.get_width() / 2);
-                projectile_shape.setFillColor(sf::Color::Cyan);
-                renderTarget.draw(projectile_shape);
-            }
-            else
+            const float projectile_x = projectile.get_x() + (projectile.get_width() / 2.0f);
+            const float projectile_y = projectile.get_y() + (projectile.get_height() / 2.0f);
+
+            projectile_path.append(sf::Vertex(sf::Vector2f(projectile_x, projectile_y), sf::Color::Red));
+            renderTarget.draw(projectile_path);
+
+            if (terrain_obj.transparent_at_pixel(projectile_x, projectile_y))
             {
-                KJ::debug_output::print(__FILE__, "Finished rendering projectile, projectile was out of bounds");
-                projectile.set_active(false);
+                collide_with_terrain(projectile);
             }
+            detect_tank(projectile);
+
+            sf::CircleShape projectile_shape(projectile.get_width());
+            projectile_shape.setPosition(projectile_x, projectile_y);
+            projectile_shape.setOrigin(projectile.get_width() / 2, projectile.get_width() / 2);
+            projectile_shape.setFillColor(sf::Color::Cyan);
+            renderTarget.draw(projectile_shape);
+
+            ++it; // Move the iterator to the next element
         }
         else
         {
-            projectiles.erase(projectiles.begin());
+            KJ::debug_output::print(__FILE__, "Finished rendering projectile");
+            it = projectiles.erase(it); // Erase the projectile and update the iterator
         }
     }
 }
@@ -843,6 +935,17 @@ sf::Texture renderer::generate_turret_texture(const int turret_width, const int 
     turret_texture.loadFromImage(turret_image);
     return turret_texture;
 }
+// Initialize the static map
+std::map<std::string, ProjectileFactory::ProjectileCreator> ProjectileFactory::projectileTypeRegistry;
+
+void renderer::engineLoadProjectiles()
+{
+
+    ProjectileFactory::RegisterProjectileType("DefaultProjectile",
+                                              [](const tank &t) { return std::make_unique<DefaultProjectile>(t); });
+    ProjectileFactory::RegisterProjectileType("CannonProjectile",
+                                              [](const tank &t) { return std::make_unique<CannonProjectile>(t); });
+}
 
 void renderer::engineCreatePlayers()
 {
@@ -971,14 +1074,8 @@ sf::Vector2f renderer::get_turret_projectile_origin(tank &tank)
 }
 
 // TODO: PROJECTILES
-void renderer::engineFireProjectile(tank tank)
+void renderer::engineFireProjectile(tank tank, std::unique_ptr<ProjectileInterface> projectile)
 {
-
-    sounds_obj.fire(); // play sound (debug)
-    const float launch_angle = tank.get_angle() - 90.0f;
-
-    newProjectile->launch(get_turret_projectile_origin(tank).x, get_turret_projectile_origin(tank).y, launch_angle);
-    projectiles.push_back(std::move(newProjectile));
 }
 
 // void renderer::fire_projectile(tank tank)

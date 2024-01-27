@@ -42,6 +42,11 @@ class ConfigJSON
     static bool saveConfigText(const std::string &filename = "config.txt");
     static bool loadConfigText(const std::string &filename = "config.txt");
 
+    static bool getVerboseMouseDebugging()
+    {
+        return getConfigValue(VERBOSE_MOUSE_DEBUGGING_KEY, DEFAULT_VERBOSE_MOUSE_DEBUGGING);
+    }
+
     static int getVerboseDebugging()
     {
         return getConfigValue(VERBOSE_DEBUGGING_KEY, DEFAULT_VERBOSE_DEBUGGING);
@@ -154,6 +159,11 @@ class ConfigJSON
 
     // Function to modify configuration data
     // Setters for configuration properties
+
+    static void setVerboseMouseDebugging(bool val)
+    {
+        setConfigValue(VERBOSE_MOUSE_DEBUGGING_KEY, val);
+    }
     static void setVerboseDebugging(int val)
     {
         setConfigValue(VERBOSE_DEBUGGING_KEY, val);
@@ -384,6 +394,7 @@ class ConfigJSON
     }
 
     // Define your configuration keys here
+    static const std::string VERBOSE_MOUSE_DEBUGGING_KEY;
     static const std::string VERBOSE_DEBUGGING_KEY;
     static const std::string RENDER_DEBUG_HITBOXES_KEY;
     static const std::string ENGINE_FONT_FILE_KEY;
@@ -406,6 +417,7 @@ class ConfigJSON
     static const std::string ENGINE_DEFAULT_START_PLAYERS_KEY;
     // Add other keys as needed
 
+    static const bool DEFAULT_VERBOSE_MOUSE_DEBUGGING;
     static const int DEFAULT_VERBOSE_DEBUGGING;
     static const bool DEFAULT_RENDER_DEBUG_HITBOXES;
     static const std::string DEFAULT_ENGINE_FONT_FILE;

@@ -8,6 +8,7 @@
 
 #include "0ProjectileDefaults.h"
 #include "ProjectileFactory.h"
+#include "ProjectileInterface.h"
 
 #include "Config.h"
 #include "Explosion.h"
@@ -81,7 +82,7 @@ class renderer
     */
     void engineSetup(sf::RenderWindow &renderWindow);
     void engineHandleInputEvents(sf::RenderWindow &renderWindow);
-    void engineFireProjectile(tank tank);
+    void engineFireProjectile(tank tank, std::unique_ptr<ProjectileInterface> projectile);
     void create_window();
     void initializeRenderer(const int screen_width, const int screen_height);
     void setIcon(sf::RenderWindow &window);
@@ -101,7 +102,23 @@ class renderer
     void engineResumeGame();
     void engineQuitGame();
     void engineOpenSettingsMenu();
+    void engineLoadProjectiles();
 
+    /*
+    Event Handlers
+    */
+    void engineHandleWindowResize(sf::RenderWindow &renderWindow, sf::Event &event);
+    void engineHandleWindowClose(sf::RenderWindow &renderWindow);
+    void engineHandleMouseMove(sf::RenderWindow &renderWindow, sf::Vector2i &mousePosition);
+    void engineHandleUserInput(sf::RenderWindow &renderWindow, sf::Event &event);
+    void engineHandleUserInputRotateLeft(sf::RenderWindow &renderWindow);
+    void engineHandleUserInputRotateRight(sf::RenderWindow &renderWindow);
+    void engineHandleUserInputPowerUp(sf::RenderWindow &renderWindow);
+    void engineHandleUserInputPowerDown(sf::RenderWindow &renderWindow);
+    void engineHandleUserInputFire(sf::RenderWindow &renderWindow);
+    void engineHandleUserInputSettingsSave(sf::RenderWindow &renderWindow);    // assigned to F2 as default
+    void engineHandleUserInputConfigToConsole(sf::RenderWindow &renderWindow); // assigned to F3 as default)
+    void engineHandleUserInputSettingsLoad(sf::RenderWindow &renderWindow);    // assigned to F6 as default
     /*
     Validation Functions
     */
@@ -175,7 +192,7 @@ class renderer
     sound_manager sounds_obj; // Sound manager class
     bool is_dragging = false; // mouse dragging - defaults to off, mouse functions then use this.
     bool enable_physics = ConfigJSON::getEnginePhysicsEnabled();     // toggle physics simulation
-    std::vector<ProjectileInterface> projectiles;                    // Vector of projectiles
+    std::vector<std::unique_ptr<ProjectileInterface>> projectiles;
     std::vector<explosion> explosions;                               // Vector of explosions
     std::vector<tank> players;                                       // Vector of players
     int player_count = 0;                                            // Player count

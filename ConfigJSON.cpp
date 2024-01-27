@@ -106,6 +106,7 @@ std::unordered_map<std::string, float> ConfigJSON::floatConfigData;
 
 // Define your configuration keys here
 
+const std::string ConfigJSON::VERBOSE_MOUSE_DEBUGGING_KEY = "verboseMouseDebugging";
 const std::string ConfigJSON::VERBOSE_DEBUGGING_KEY = "verboseDebugging";
 const std::string ConfigJSON::RENDER_DEBUG_HITBOXES_KEY = "renderDebugHitboxes";
 const std::string ConfigJSON::ENGINE_FONT_FILE_KEY = "engineFontFile";
@@ -127,6 +128,7 @@ const std::string ConfigJSON::RENDER_DEBUG_MENU_FORCE_KEY = "renderDebugMenuForc
 const std::string ConfigJSON::RENDER_MENU_BACKGROUND_FILE_KEY = "renderMenuBackgroundFile";
 const std::string ConfigJSON::ENGINE_DEFAULT_START_PLAYERS_KEY = "engineDefaultStartPlayers";
 
+const bool ConfigJSON::DEFAULT_VERBOSE_MOUSE_DEBUGGING = false;
 const int ConfigJSON::DEFAULT_VERBOSE_DEBUGGING = 1;
 const bool ConfigJSON::DEFAULT_RENDER_DEBUG_HITBOXES = false;
 const std::string ConfigJSON::DEFAULT_ENGINE_FONT_FILE = "Roboto-Bold.ttf";
@@ -134,12 +136,12 @@ const bool ConfigJSON::DEFAULT_DEFAULT_FULLSCREEN = false;
 const std::string ConfigJSON::DEFAULT_GAME_WINDOW_TITLE = "Scorched Earth";
 const float ConfigJSON::DEFAULT_ENGINE_GRAVITY = 9.81f;
 const float ConfigJSON::DEFAULT_ENGINE_SPEED = 1.5f;
-const int ConfigJSON::DEFAULT_MAX_FPS = 60;
+const int ConfigJSON::DEFAULT_MAX_FPS = 0;
 const bool ConfigJSON::DEFAULT_RENDER_DEBUG_GRID = false;
 const bool ConfigJSON::DEFAULT_RENDER_FPS = true;
 const int ConfigJSON::DEFAULT_WINDOWED_RESOLUTION_X = 1280;
 const int ConfigJSON::DEFAULT_WINDOWED_RESOLUTION_Y = 720;
-const float ConfigJSON::DEFAULT_ENGINE_PROJECTILE_SPEED = 5.0f;
+const float ConfigJSON::DEFAULT_ENGINE_PROJECTILE_SPEED = 2.0f;
 const bool ConfigJSON::DEFAULT_ENGINE_PHYSICS_ENABLED = true;
 const int ConfigJSON::DEFAULT_RENDER_BACKGROUND_PARTICLE_COUNT = 100;
 const bool ConfigJSON::DEFAULT_RENDER_PARTICLES_ENABLED = true;
