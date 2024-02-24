@@ -205,3 +205,12 @@ sf::Texture tank::get_turret_texture()
     }
     return turret_texture;
 }
+
+int tank::get_active_projectile() const
+{
+    return active_projectile_;
+}
+void tank::set_active_projectile(int projectile)
+{
+    active_projectile_ = projectile;
+}

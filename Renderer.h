@@ -119,6 +119,8 @@ class renderer
     void engineHandleUserInputSettingsSave(sf::RenderWindow &renderWindow);    // assigned to F2 as default
     void engineHandleUserInputConfigToConsole(sf::RenderWindow &renderWindow); // assigned to F3 as default)
     void engineHandleUserInputSettingsLoad(sf::RenderWindow &renderWindow);    // assigned to F6 as default
+    void engineHandleUserInputChangeWeapon(
+        const bool increment); // assigned to PAGEUP/PAGEDOWN as default (increment = true/false)
     /*
     Validation Functions
     */
@@ -191,7 +193,7 @@ class renderer
     physics physics;          // Physics class
     sound_manager sounds_obj; // Sound manager class
     bool is_dragging = false; // mouse dragging - defaults to off, mouse functions then use this.
-    bool enable_physics = ConfigJSON::getEnginePhysicsEnabled();     // toggle physics simulation
+    bool enable_physics = ConfigJSON::getEnginePhysicsEnabled(); // toggle physics simulation
     std::vector<std::unique_ptr<ProjectileInterface>> projectiles;
     std::vector<explosion> explosions;                               // Vector of explosions
     std::vector<tank> players;                                       // Vector of players

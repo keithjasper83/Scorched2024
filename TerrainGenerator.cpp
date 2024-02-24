@@ -196,12 +196,34 @@ void terrain_generator::update_terrain_with_explosion(int pos_x, int pos_y, cons
     terrain_sprite.setTexture(terrain_texture);
 }
 
+/// <summary>
+/// Used to create a cached image of the terrain texture. This is used to determine if a pixel is transparent or not
+///
+/// This is a workaround for the fact that the terrain texture is scaled to the screen size, so the pixel coordinates
+/// are not the same as the terrain texture coordinates
+///
+/// this function is called every time a player fires to ensure its uptodate
+/// </summary>
+void terrain_generator::cache_terrain_image()
+{
+    cached_terrain_image = terrain_texture.copyToImage();
+}
+
 bool terrain_generator::transparent_at_pixel(const int x, const int y) const
 {
-    // cout << "TerrainGenerator.cpp - Pixel: " << x << ", " << y << endl;
-    const sf::Color pixel = terrain_texture.copyToImage().getPixel((x / window_scale.x), (y / window_scale.y));
-    // printf("TerrainGenerator.cpp - TransparentAtPixel() - X: %d, Y: %d Aplha: %d\n", x, y, pixel.a);
-    return pixel.a != 0;
+    // Ensure that the coordinates are within the valid range of the cached terrain image
+    if (x >= 0 && x < cached_terrain_image.getSize().x && y >= 0 && y < cached_terrain_image.getSize().y)
+    {
+        const sf::Color pixel = cached_terrain_image.getPixel(static_cast<int>((x / window_scale.x)),
+                                                              static_cast<int>((y / window_scale.y)));
+        // Check if the pixel is transparent
+        return pixel.a != 0;
+    }
+    else
+    {
+        // Coordinates are outside the valid range, consider it non-transparent
+        return false;
+    }
 }
 
 void terrain_generator::update_pixel_array(float x_scale, float y_scale)

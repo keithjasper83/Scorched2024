@@ -1,4 +1,5 @@
 #include "HUD.h"
+#include "ProjectileFactory.h"
 
 hud::hud()
 {
@@ -40,7 +41,9 @@ sf::Text hud::generate_player_data(tank tank) const
     std::string player_health = " Health: " + std::to_string(tank.get_health());
     std::string player_power = " Power: " + std::to_string(static_cast<int>(tank.get_power()));
     std::string player_angle = " Angle: " + std::to_string(static_cast<int>(tank.get_angle()));
-    std::string player_weapon = " Weapon: " + tank.get_weapon_name();
+    std::string player_weapon =
+        " Weapon: " + ProjectileFactory::projectileTypeToString(
+                          static_cast<ProjectileTypes::ProjectileType>(tank.get_active_projectile()));
     std::string player_ammo = " Ammo: " + std::to_string(tank.get_ammo());
 
     std::string player_data = player_name + player_health + player_power + player_angle + player_ammo + player_weapon;

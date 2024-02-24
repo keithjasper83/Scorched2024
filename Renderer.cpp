@@ -353,13 +353,14 @@ void renderer::engineHandleMouseMove(sf::RenderWindow &renderWindow, sf::Vector2
 
 void renderer::engineHandleUserInputFire(sf::RenderWindow &renderWindow)
 {
+    terrain_obj.cache_terrain_image();
     if (projectiles.size() < 1)
     {
         players[currentPlayer].fire();
 
         // Assuming 'selectedProjectileType' is the user's choice
-        ProjectileType selectedProjectileType = ProjectileType::DefaultProjectile; // Change this based on user input
-
+        ProjectileTypes::ProjectileType selectedProjectileType =
+            static_cast<ProjectileTypes::ProjectileType>(players[currentPlayer].get_active_projectile());
         // Create a projectile using the factory
         std::unique_ptr<ProjectileInterface> projectile = ProjectileFactory::CreateProjectile(
             ProjectileFactory::projectileTypeToString(selectedProjectileType), players[currentPlayer]);
@@ -368,7 +369,7 @@ void renderer::engineHandleUserInputFire(sf::RenderWindow &renderWindow)
 
         if (projectile)
         {
-            const float launch_angle = players[currentPlayer].get_angle() - 90.0f;
+            const float launch_angle = players[currentPlayer].get_angle();
             try
             {
                 // Use a temporary variable to store the origin, avoiding duplicate function calls
@@ -395,6 +396,7 @@ void renderer::engineHandleUserInputFire(sf::RenderWindow &renderWindow)
         }
     }
 }
+
 void renderer::engineHandleUserInputRotateLeft(sf::RenderWindow &renderWindow)
 {
     if (projectiles.size() >= 1)
@@ -468,6 +470,30 @@ void renderer::engineHandleUserInputSettingsLoad(sf::RenderWindow &renderWindow)
     // exit(0);
 }
 
+void renderer::engineHandleUserInputChangeWeapon(const bool increment)
+{
+    const int numProjectiles =
+        static_cast<int>(ProjectileTypes::ProjectileType::Count); // Update this if you add more projectile types
+    int activeProjectile = static_cast<int>(players[currentPlayer].get_active_projectile());
+
+    if (increment)
+    {
+        activeProjectile = (activeProjectile + 1) % numProjectiles;
+    }
+    else
+    {
+        activeProjectile = (activeProjectile - 1 + numProjectiles) % numProjectiles;
+    }
+
+    players[currentPlayer].set_active_projectile(activeProjectile);
+
+    const ProjectileTypes::ProjectileType activeType = static_cast<ProjectileTypes::ProjectileType>(activeProjectile);
+
+    KJ::debug_output::print(__FILE__,
+                            "Switched to projectile type: " + ProjectileFactory::projectileTypeToString(activeType),
+                            KJ::debug_output::MessageType::GOOD);
+}
+
 void renderer::engineHandleUserInput(sf::RenderWindow &renderWindow, sf::Event &event)
 {
     switch (event.key.code)
@@ -486,6 +512,13 @@ void renderer::engineHandleUserInput(sf::RenderWindow &renderWindow, sf::Event &
         break;
     case sf::Keyboard::Space:
         engineHandleUserInputFire(renderWindow);
+        break;
+
+    case sf::Keyboard::PageUp:
+        engineHandleUserInputChangeWeapon(true);
+        break;
+    case sf::Keyboard::PageDown:
+        engineHandleUserInputChangeWeapon(false);
         break;
 
         /*
@@ -686,13 +719,18 @@ void renderer::renderProjectiles(sf::RenderWindow &renderTarget)
 
         if (projectile.is_active())
         {
-            KJ::debug_output::print(__FILE__, "Rendering projectile", KJ::debug_output::MessageType::GOOD);
+            KJ::debug_output::print(__FILE__, "Rendering projectile", KJ::debug_output::MessageType::INFO);
             const float time_elapsed = delta_time.asSeconds() * ConfigJSON::getEngineProjectileSpeed();
-            projectile.update_position(time_elapsed, gravity);
-            std::cout << "Projectile Coordinates: " << projectile.get_x() << ", " << projectile.get_y() << std::endl;
+            projectile.update_position(time_elapsed, gravity, renderTarget);
 
             const float projectile_x = projectile.get_x() + (projectile.get_width() / 2.0f);
             const float projectile_y = projectile.get_y() + (projectile.get_height() / 2.0f);
+
+            if (projectile_x < -2000 || projectile_x > ConfigJSON::getWindowedResolutionX() + 2000)
+            {
+                // If the projectile goes 2000 pixels off-screen, mark it as inactive
+                projectile.set_active(false);
+            }
 
             projectile_path.append(sf::Vertex(sf::Vector2f(projectile_x, projectile_y), sf::Color::Red));
             renderTarget.draw(projectile_path);
@@ -703,18 +741,27 @@ void renderer::renderProjectiles(sf::RenderWindow &renderTarget)
             }
             detect_tank(projectile);
 
-            sf::CircleShape projectile_shape(projectile.get_width());
-            projectile_shape.setPosition(projectile_x, projectile_y);
-            projectile_shape.setOrigin(projectile.get_width() / 2, projectile.get_width() / 2);
-            projectile_shape.setFillColor(sf::Color::Cyan);
-            renderTarget.draw(projectile_shape);
-
-            ++it; // Move the iterator to the next element
+            if (projectile.is_visible(renderTarget.getSize().x, renderTarget.getSize().y))
+            {
+                const sf::Drawable *render_property = projectile.get_render_property();
+                if (render_property)
+                {
+                    renderTarget.draw(*dynamic_cast<const sf::Drawable *>(render_property));
+                }
+            }
         }
         else
         {
             KJ::debug_output::print(__FILE__, "Finished rendering projectile");
+        }
+        if (!projectile.is_active())
+        {
+            KJ::debug_output::print(__FILE__, "Finished rendering projectile");
             it = projectiles.erase(it); // Erase the projectile and update the iterator
+        }
+        else
+        {
+            ++it; // Move the iterator to the next element
         }
     }
 }

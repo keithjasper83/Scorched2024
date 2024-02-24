@@ -98,8 +98,13 @@ class tank
 
     int get_ammo() const;
 
-    std::string get_weapon_name() const;
     sf::Vector2f get_turret_tip_position() const;
     static sf::Texture get_tank_texture();
     static sf::Texture get_turret_texture();
+    std::string get_weapon_name() const;
+
+    int get_active_projectile() const;
+    void set_active_projectile(int projectileType);
+
+    int active_projectile_ = 0;
 };

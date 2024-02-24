@@ -1,5 +1,10 @@
 #pragma once
-#include "Tank.h"
+#include "debug_output.h"
+#include "tank.h"
+#include <SFML/Graphics.hpp>
+#include <cmath>
+#include <iostream>
+#include <string>
 
 class ProjectileInterface
 {
@@ -18,11 +23,14 @@ class ProjectileInterface
         // ...
         set_start_x(initial_x);
         set_start_y(initial_y);
-
         // Set initial velocity based on launch angle and tank power
         float power_factor = tank_power * ConfigJSON::getEngineProjectileSpeed();
-        velocity_x_ = std::cos(launch_angle * (M_PI / 180.0f)) * power_factor;
-        velocity_y_ = std::sin(launch_angle * (M_PI / 180.0f)) * power_factor; // Negative for correct y direction
+        float corrected_angle = launch_angle + 90.0f; // Adjust the angle here
+
+        initial_velocity_x_ = std::cos(corrected_angle * (M_PI / 180.0f)) * power_factor;
+        initial_velocity_y_ =
+            std::sin(corrected_angle * (M_PI / 180.0f)) * power_factor; // Negative for correct y direction
+        set_velocity(initial_velocity_x_, initial_velocity_y_);
     }
 
     virtual void set_active(bool active)
@@ -101,8 +109,7 @@ class ProjectileInterface
         explosion_duration_ = explosion_duration;
     }
 
-    // Assuming this is part of the ProjectileInterface class declaration
-    virtual void update_position(const float time_elapsed, const float gravity)
+    virtual void update_position(const float time_elapsed, const float gravity, const sf::RenderWindow &renderTarget)
     {
         if (x_ == 0 && y_ == 0)
         {
@@ -117,28 +124,56 @@ class ProjectileInterface
             velocity_y_ += gravity * time_elapsed;
 
             x_ += velocity_x_ * time_elapsed;
-            y_ -= velocity_y_ * time_elapsed - 0.5f * gravity;
+            y_ += velocity_y_ * time_elapsed - 0.5f * gravity * time_elapsed * time_elapsed;
 
-            if (x_ < 0 || x_ > ConfigJSON::getWindowedResolutionX() || y_ < 0 ||
-                y_ > ConfigJSON::getWindowedResolutionY())
+            // Check for collision with the ground or window boundaries
+
+            sf::Vector2u windowSize = renderTarget.getSize();
+
+            if (y_ >= windowSize.y || x_ < 0 || x_ > windowSize.x)
             {
                 set_active(false);
                 KJ::debug_output::print(__FILE__, "ProjectileInterface::update_position() - Projectile out of bounds",
                                         KJ::debug_output::MessageType::ERROR);
-                x_ = 0;
-                y_ = 0;
-            }
-            std::cout << "New Projectile position: " << x_ << ", " << y_ << "\n";
-            // Update explosion timer if necessary
-            if (get_exploded())
-            {
-                set_explosion_timer(get_explosion_timer() + time_elapsed);
-                if (get_explosion_timer() >= get_explosion_duration())
-                {
-                    set_active(false); // Deactivate the projectile after explosion duration
-                }
             }
         }
+
+        // Update explosion timer if necessary
+        if (get_exploded())
+        {
+            set_explosion_timer(get_explosion_timer() + time_elapsed);
+            if (get_explosion_timer() >= get_explosion_duration())
+            {
+                set_active(false); // Deactivate the projectile after explosion duration
+            }
+        }
+    }
+
+    bool is_visible() const
+    {
+        return (x_ >= 0 && x_ <= ConfigJSON::getWindowedResolutionX() && y_ >= 0 &&
+                y_ <= ConfigJSON::getWindowedResolutionY());
+    }
+
+    bool is_visible(int x, int y) const
+    {
+        return (x_ >= 0 && x_ <= x && y_ >= 0 && y_ <= y);
+    }
+
+    virtual const sf::Drawable *get_render_property() const
+    {
+        // Default rendering properties (can be overridden by derived classes)
+        sf::CircleShape *projectile_shape = new sf::CircleShape(get_width());
+        projectile_shape->setFillColor(sf::Color::Cyan);
+        projectile_shape->setPosition(get_x(), get_y());
+        projectile_shape->setOrigin(get_width() / 2.0f, get_height() / 2.0f);
+        projectile_shape->setRotation(std::atan2(get_velocity_y(), get_velocity_x()) * (180.0f / M_PI));
+        projectile_shape->setScale(1.0f, 1.0f);
+        projectile_shape->setOutlineThickness(1.0f);
+        projectile_shape->setOutlineColor(sf::Color::Black);
+        projectile_shape->setPointCount(360);
+        projectile_shape->setFillColor(sf::Color::Yellow);
+        return projectile_shape;
     }
 
   protected:
@@ -147,6 +182,8 @@ class ProjectileInterface
     int damage_ = 1;
     int start_x_ = 200;
     int start_y_ = 200;
+    float initial_velocity_x_ = 1.0f;
+    float initial_velocity_y_ = 1.0f;
     float velocity_x_ = 1.0f;
     float velocity_y_ = 1.0f;
     float x_ = 0;
@@ -156,7 +193,12 @@ class ProjectileInterface
     bool active_ = false;
     bool exploded_ = false;
     tank tank_;
-    // Add more pure virtual functions for common projectile features
+
+    void set_velocity(float vx, float vy)
+    {
+        velocity_x_ = vx;
+        velocity_y_ = vy;
+    }
 };
 
 inline ProjectileInterface::ProjectileInterface(const tank &tank) : tank_{tank}

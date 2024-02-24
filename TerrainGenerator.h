@@ -20,6 +20,7 @@ class terrain_generator
     sf::Sprite terrain_sprite_master;
     sf::Image terrain_image;
     sf::Image terrain_image_master;
+    sf::Image cached_terrain_image;
     scale window_scale;
     bool update_pixel_array_flag = false;
 
@@ -40,6 +41,7 @@ class terrain_generator
     sf::Sprite get_terrain_sprite() const;
     void update_pixel_array(float x_scale, float y_scale);
     int get_pixel_map_size();
+    void cache_terrain_image();
 
   private:
     int width_;

@@ -7,12 +7,16 @@
 #include <map>
 #include <memory>
 
+namespace ProjectileTypes
+{
 enum class ProjectileType
 {
     DefaultProjectile,
     CannonProjectile,
+    Count = 2,
     // Add other projectile types as needed
 };
+} // namespace ProjectileTypes
 
 class ProjectileFactory
 {
@@ -33,14 +37,14 @@ class ProjectileFactory
         return nullptr; // Return nullptr if the specified type is not registered
     }
 
-    static std::string projectileTypeToString(ProjectileType type)
+    static std::string projectileTypeToString(ProjectileTypes::ProjectileType type)
     {
         switch (type)
         {
-        case ProjectileType::DefaultProjectile:
+        case ProjectileTypes::ProjectileType::DefaultProjectile:
             return "DefaultProjectile";
             break;
-        case ProjectileType::CannonProjectile:
+        case ProjectileTypes::ProjectileType::CannonProjectile:
             return "CannonProjectile";
             break;
             // Add cases for other projectile types
