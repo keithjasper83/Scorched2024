@@ -752,10 +752,12 @@ void renderer::renderProjectiles(sf::RenderWindow &renderTarget)
         }
         else
         {
+            rotatePlayerTurn();
             KJ::debug_output::print(__FILE__, "Finished rendering projectile");
         }
         if (!projectile.is_active())
         {
+            rotatePlayerTurn();
             KJ::debug_output::print(__FILE__, "Finished rendering projectile");
             it = projectiles.erase(it); // Erase the projectile and update the iterator
         }
@@ -776,7 +778,6 @@ void renderer::collide_with_tank(int player_index, ProjectileInterface &projecti
     players[player_index].reduce_health_by(projectile.get_damage());
     queue_render_explosion(projectile);
     sounds_obj.explode(); // Play sound (debug)
-    rotatePlayerTurn();
 }
 
 void renderer::detect_tank(ProjectileInterface &projectile)
@@ -831,7 +832,6 @@ void renderer::collide_with_terrain(ProjectileInterface &projectile)
     sounds_obj.explode(); // Play sound (debug)
     projectile.set_active(false);
     projectile_path.clear();
-    rotatePlayerTurn();
     KJ::debug_output::print(__FILE__, "Projectile hit terrain", KJ::debug_output::MessageType::GOOD);
 }
 
