@@ -95,3 +95,37 @@ void MenuManager::renderWinStateButtons(std::function<void()> restartFunction, s
 
     winMenu.render();
 }
+
+void MenuManager::renderSettingsMenu(std::function<void()> backFunction, std::function<void()> applyFunction)
+{
+    sf::RectangleShape backgroundRect(sf::Vector2f(window_.getSize().x, window_.getSize().y));
+    backgroundRect.setFillColor(sf::Color(200, 200, 200, 128)); // Light grey with transparency
+    window_.draw(backgroundRect);
+
+    Menu settingsMenu(window_);
+
+    // Use MenuButton instances instead of directly creating MenuButton objects
+    MenuButton backButton(font_, "Back", sf::Vector2f(window_.getSize().x / 2.0f, window_.getSize().y / 2.0f - 80),
+                          sf::Vector2f(200, 50), true);
+    MenuButton applyButton(font_, "Apply", sf::Vector2f(window_.getSize().x / 2.0f, window_.getSize().y / 2.0f - 20),
+                           sf::Vector2f(200, 50), true);
+
+    backButton.onClick(backFunction);
+    applyButton.onClick(applyFunction);
+
+    // Add buttons to the menu
+    settingsMenu.addButton(backButton);
+    settingsMenu.addButton(applyButton);
+
+    sf::Event event;
+    while (window_.pollEvent(event))
+    {
+        if (event.type == sf::Event::Closed)
+        {
+            window_.close();
+        }
+        settingsMenu.handleEvent(event);
+    }
+
+    settingsMenu.render();
+}

@@ -883,6 +883,11 @@ void renderer::renderMenuScreens(sf::RenderWindow &renderWindow)
 
 void renderer::render(sf::RenderWindow &renderWindow)
 {
+    if (!renderWindow.hasFocus())
+    {
+        return; // Exit the function if the window does not have focus
+    }
+
     renderWindow.clear(); // Clear the window
     // todo: move console output to a debug function - based on flag? seperate class?
     renderBackground(renderWindow);
@@ -906,6 +911,16 @@ void renderer::renderPauseMenu(sf::RenderWindow &renderTarget)
         MenuManager menuManager(renderTarget, font);
         menuManager.renderPauseMenu([this]() { engineResumeGame(); }, [this]() { engineOpenSettingsMenu(); },
                                     [this]() { engineQuitGame(); });
+    }
+}
+
+void renderer::renderSettingsMenu(sf::RenderWindow &renderTarget)
+{
+    if (display_settings_menu)
+    {
+        MenuManager menuManager(renderTarget, font);
+        menuManager.renderSettingsMenu([this]() { engineHandleUserInputSettingsSave(window_); },
+                                       [this]() { engineHandleUserInputSettingsLoad(window_); });
     }
 }
 
@@ -941,6 +956,10 @@ void renderer::engineResumeGame()
 void renderer::engineOpenSettingsMenu()
 {
     // Logic to open the settings menu
+    KJ::debug_output::print(__FILE__, "Opening settings menu", KJ::debug_output::MessageType::INFO);
+    display_menu = false;         // Hide the pause menu
+    display_settings_menu = true; // Show the settings menu
+
     // Additional actions to display settings...
 }
 

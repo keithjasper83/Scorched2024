@@ -13,6 +13,8 @@ class MenuManager
                          std::function<void()> quitFunction);
     void renderWinStateButtons(std::function<void()> restartFunction, std::function<void()> quitFunction);
 
+    void renderSettingsMenu(std::function<void()> backFunction, std::function<void()> applyFunction);
+
   private:
     sf::RenderWindow &window_;
     sf::Font &font_;

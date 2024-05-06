@@ -63,6 +63,7 @@ class renderer
     void renderParticles(sf::RenderWindow &renderWindow);
     void renderMenuScreens(sf::RenderWindow &renderWindow);
     void renderPauseMenu(sf::RenderWindow &renderWindow);
+    void renderSettingsMenu(sf::RenderWindow &renderWindow);
     void renderDebugData(sf::RenderWindow &renderWindow);
     void renderDebugGrid(sf::RenderWindow &renderWindow, int pixels = 100);
     void renderDebugFPS(sf::RenderWindow &renderWindow);
@@ -205,7 +206,7 @@ class renderer
     sf::Texture tank_texture = tank::get_tank_texture();             // generate tank texture
     sf::Texture turret_texture = tank::get_turret_texture();         // generate turret texture
     bool display_menu = ConfigJSON::getRenderDebugMenuForce();       // Display the menu
-    bool display_settings_menu = false;
+    bool display_settings_menu = true;
 
     std::string selectedProjectileType = "DefaultProjectile"; // or "Missile" based on user selection or logic
 };
