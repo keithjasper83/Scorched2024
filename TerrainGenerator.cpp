@@ -6,7 +6,8 @@ terrain_generator::terrain_generator()
 {
     if (!terrain_texture.loadFromFile("Images/overlay.png"))
     {
-        printf("Failed to load texture"); // Error handling
+        throw std::runtime_error("Failed to load texture"); // Error handling
+        printf("Failed to load texture");                   // Error handling
     }
 
     // Create a sprite for the terrain

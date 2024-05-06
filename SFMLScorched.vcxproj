@@ -204,6 +204,9 @@
     <Image Include="Images\menu_background.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Images\overlay.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="Images\rock1.jpg">
       <DeploymentContent>true</DeploymentContent>
     </Image>

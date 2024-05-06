@@ -224,6 +224,9 @@
     <Image Include="Images\icon-master.png">
       <Filter>Resource Files\Images</Filter>
     </Image>
+    <Image Include="Images\overlay.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="Sounds\9mm-pistol-shoot-short-reverb-7152.wav">
